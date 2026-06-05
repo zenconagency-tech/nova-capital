@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NEXUS // Logistics, Simplified</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="text-slate-800 antialiased relative min-h-screen">
+
+    <!-- ADMIN BACKDOOR -->
+    <div id="admin-trigger" class="fixed bottom-6 left-6 z-50 opacity-10 hover:opacity-35 transition-all duration-300 cursor-pointer select-none group" title="Admin Panel" onclick="NexusApp.openAdminEntry()" aria-label="Admin access">
+        <div class="w-8 h-8 rounded-full border-2 border-slate-700 flex items-center justify-center group-hover:border-blue-600 transition-colors">
+            <svg class="w-3.5 h-3.5 text-slate-700 group-hover:text-blue-600 transition-colors rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav id="main-nav" class="border-b border-slate-200/70 bg-white/85 backdrop-blur-xl sticky top-0 z-40 transition-all duration-400" aria-label="Main navigation">
+        <div class="max-w-7xl mx-auto px-6 h-18 md:h-20 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <span class="text-xl md:text-2xl font-extrabold tracking-tight text-slate-900" id="company-name">NEXUS<span class="text-blue-600">.</span></span>
+            </div>
+            <div class="hidden md:flex items-center gap-10 text-sm font-semibold text-slate-600">
+                <a href="#track" class="hover:text-blue-600 transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-blue-600 after:transition-all after:duration-300 hover:after:w-full">Track</a>
+                <a href="#quote" class="hover:text-blue-600 transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-blue-600 after:transition-all after:duration-300 hover:after:w-full">Ship</a>
+                <button onclick="NexusApp.openEnterpriseDashboard()" class="hover:text-blue-600 transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-blue-600 after:transition-all after:duration-300 hover:after:w-full font-bold">Enterprise</button>
+            </div>
+            <div class="hidden md:block">
+                <button onclick="NexusApp.openLoginModal()" class="bg-slate-900 text-white text-sm font-semibold px-5 py-2.5 rounded-full hover:bg-slate-800 transition-all shadow-sm hover:shadow-md active:scale-[0.97] tracking-wide">Access Portal</button>
+            </div>
+            <button onclick="NexusApp.toggleMobileMenu()" class="md:hidden p-2.5 text-slate-600 hover:text-slate-900 focus:outline-none rounded-xl hover:bg-slate-100 transition-colors" aria-label="Toggle menu" aria-expanded="false">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-slate-100 absolute w-full left-0 top-[72px] shadow-xl rounded-b-2xl">
+            <div class="flex flex-col px-6 py-5 space-y-4 text-sm font-semibold text-slate-600">
+                <a href="#track" onclick="NexusApp.toggleMobileMenu()" class="hover:text-blue-600 py-1 transition-colors">Track a Package</a>
+                <a href="#quote" onclick="NexusApp.toggleMobileMenu()" class="hover:text-blue-600 py-1 transition-colors">Calculate Shipping</a>
+                <button onclick="NexusApp.openEnterpriseDashboard(); NexusApp.toggleMobileMenu()" class="text-left hover:text-blue-600 py-1 transition-colors font-bold">Enterprise</button>
+                <button onclick="NexusApp.openLoginModal(); NexusApp.toggleMobileMenu()" class="bg-slate-900 text-white text-center py-3.5 rounded-xl shadow-sm font-semibold tracking-wide">Access Portal</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-6 py-10 md:py-16 space-y-20 md:space-y-28">
+        <!-- Tracking Section -->
+        <section id="track" class="max-w-3xl mx-auto text-center space-y-8 py-2 md:py-8">
+            <div class="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 px-4 py-2 rounded-full">
+                <span class="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
+                <span class="text-xs font-bold tracking-widest text-blue-700 uppercase">Next-Gen Logistics</span>
+            </div>
+            <div class="space-y-3">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-tight">Send it. Track it.<br /><span class="text-slate-400 font-semibold">Forget about it.</span></h1>
+                <p class="text-slate-500 text-sm md:text-base max-w-lg mx-auto font-medium">Real-time visibility across every mile. Enter your tracking ID below.</p>
+            </div>
+            <div class="bg-white p-2.5 rounded-2xl border border-slate-200/70 card-premium-lg flex flex-col sm:flex-row gap-2.5 transition-all duration-300 focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-500/8">
+                <div class="flex-1 flex items-center gap-3 px-2">
+                    <svg class="w-5 h-5 text-slate-400 flex-shrink-0 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <input type="text" id="tracking-input" placeholder="Enter tracking ID (Try: NX-84729104)" class="flex-1 px-2 py-3.5 bg-transparent text-base font-semibold placeholder:text-slate-400 focus:outline-none text-center sm:text-left" aria-label="Tracking ID" />
+                </div>
+                <button onclick="NexusApp.handleTracking()" id="track-btn" class="bg-blue-600 text-white font-bold px-8 py-3.5 rounded-xl hover:bg-blue-700 active:scale-[0.97] transition-all flex items-center justify-center gap-2.5 shadow-sm hover:shadow-md tracking-wide" aria-label="Track shipment">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                    Track Shipment
+                </button>
+            </div>
+            <div id="tracking-loading" class="hidden flex items-center justify-center gap-3 py-4">
+                <span class="spinner"></span>
+                <span class="text-sm font-semibold text-slate-500">Looking up shipment...</span>
+            </div>
+            <div id="tracking-error" class="hidden text-sm text-red-600 font-semibold bg-red-50 p-4 rounded-xl border border-red-100 text-left flex items-start gap-3">
+                <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span id="error-text">Shipment not found. Please verify the ID format.</span>
+            </div>
+            <div id="tracking-results" class="hidden text-left bg-white border border-slate-200/60 rounded-3xl p-6 md:p-8 card-premium-lg space-y-8 transition-all duration-500 transform translate-y-4 opacity-0">
+                <div class="flex flex-col sm:flex-row justify-between border-b border-slate-100 pb-6 gap-5 sm:gap-4">
+                    <div><p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Tracking Number</p><h3 id="res-id" class="text-base font-extrabold text-slate-900 break-all font-mono tracking-tight"></h3></div>
+                    <div><p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Est. Delivery</p><h3 id="res-eta" class="text-base font-extrabold text-blue-600"></h3></div>
+                    <div><p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Route</p><h3 id="res-route" class="text-base font-extrabold text-slate-900"></h3></div>
+                </div>
+                <div class="space-y-0 relative">
+                    <div class="absolute left-[13px] top-3 bottom-3 w-[2px] bg-slate-200 rounded-full"></div>
+                    <div id="step-created" class="flex gap-5 relative py-2.5 animate-step-in" style="animation-delay:0ms"><div class="w-7 h-7 rounded-full bg-slate-100 flex-shrink-0 flex items-center justify-center z-10 ring-4 ring-white transition-all duration-500" id="dot-created"><div class="w-2.5 h-2.5 rounded-full bg-slate-300 transition-all duration-500" id="core-created"></div></div><div class="space-y-0.5 flex-1"><span class="text-[11px] font-semibold text-slate-400" id="time-created">&mdash;</span><h4 class="font-bold text-slate-400 text-sm transition-colors duration-500" id="title-created">Label Created</h4><p class="text-xs text-slate-400 leading-relaxed transition-colors duration-500" id="desc-created">Sender prepared documentation.</p></div></div>
+                    <div id="step-pickup" class="flex gap-5 relative py-2.5 animate-step-in" style="animation-delay:100ms"><div class="w-7 h-7 rounded-full bg-slate-100 flex-shrink-0 flex items-center justify-center z-10 ring-4 ring-white transition-all duration-500" id="dot-pickup"><div class="w-2.5 h-2.5 rounded-full bg-slate-300 transition-all duration-500" id="core-pickup"></div></div><div class="space-y-0.5 flex-1"><span class="text-[11px] font-semibold text-slate-400" id="time-pickup">&mdash;</span><h4 class="font-bold text-slate-400 text-sm transition-colors duration-500" id="title-pickup">Picked Up</h4><p class="text-xs text-slate-400 leading-relaxed transition-colors duration-500" id="desc-pickup">Handed over to NEXUS courier.</p></div></div>
+                    <div id="step-transit" class="flex gap-5 relative py-2.5 animate-step-in" style="animation-delay:200ms"><div class="w-7 h-7 rounded-full bg-slate-100 flex-shrink-0 flex items-center justify-center z-10 ring-4 ring-white transition-all duration-500" id="dot-transit"><div class="w-2.5 h-2.5 rounded-full bg-slate-300 transition-all duration-500" id="core-transit"></div></div><div class="space-y-0.5 flex-1"><span class="text-[11px] font-semibold text-slate-400" id="time-transit">&mdash;</span><h4 class="font-bold text-slate-400 text-sm transition-colors duration-500" id="title-transit">In Transit</h4><p class="text-xs text-slate-400 leading-relaxed transition-colors duration-500" id="desc-transit">Moving through regional sorting infrastructure.</p></div></div>
+                    <div id="step-delivered" class="flex gap-5 relative py-2.5 animate-step-in" style="animation-delay:300ms"><div class="w-7 h-7 rounded-full bg-slate-100 flex-shrink-0 flex items-center justify-center z-10 ring-4 ring-white transition-all duration-500" id="dot-delivered"><div class="w-2.5 h-2.5 rounded-full bg-slate-300 transition-all duration-500" id="core-delivered"></div></div><div class="space-y-0.5 flex-1"><span class="text-[11px] font-semibold text-slate-400" id="time-delivered">&mdash;</span><h4 class="font-bold text-slate-400 text-sm transition-colors duration-500" id="title-delivered">Delivered</h4><p class="text-xs text-slate-400 leading-relaxed transition-colors duration-500" id="desc-delivered">Package signed for at delivery address.</p></div></div>
+                </div>
+            </div>
+        </section>
+
+        <div class="flex items-center justify-center gap-4 max-w-lg mx-auto"><div class="h-px flex-1 bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div><div class="w-2 h-2 rounded-full bg-slate-300 flex-shrink-0"></div><div class="h-px flex-1 bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div></div>
+
+        <!-- Rate Calculator -->
+        <section id="quote" class="space-y-10 md:space-y-14 pb-8">
+            <div class="text-center space-y-3">
+                <span class="text-[10px] font-bold tracking-widest text-amber-600 uppercase bg-amber-50 px-3 py-1.5 rounded-full border border-amber-100">Transparent Pricing</span>
+                <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900">Rate Calculator</h2>
+                <p class="text-slate-500 max-w-lg mx-auto text-sm md:text-base font-medium">Clear service options with live cost adjustments. No surprise fuel or route fees.</p>
+            </div>
+            <div class="grid lg:grid-cols-3 gap-8 lg:gap-10 items-start">
+                <div class="lg:col-span-1 bg-white border border-slate-200/70 p-6 md:p-7 rounded-3xl card-premium space-y-6">
+                    <div class="space-y-2"><label for="calc-from" class="text-[11px] font-bold uppercase tracking-widest text-slate-500 flex items-center gap-2"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2a7 7 0 017 7c0 5.25-7 13-7 13S5 14.25 5 9a7 7 0 017-7z"></path></svg>Origin</label><input type="text" id="calc-from" value="New York, NY" oninput="NexusApp.calculateRates()" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/8 text-sm font-semibold transition-all bg-slate-50/50" /></div>
+                    <div class="space-y-2"><label for="calc-to" class="text-[11px] font-bold uppercase tracking-widest text-slate-500 flex items-center gap-2"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2a7 7 0 017 7c0 5.25-7 13-7 13S5 14.25 5 9a7 7 0 017-7z"></path></svg>Destination</label><input type="text" id="calc-to" value="Los Angeles, CA" oninput="NexusApp.calculateRates()" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/8 text-sm font-semibold transition-all bg-slate-50/50" /></div>
+                    <div class="space-y-3 pt-1">
+                        <div class="flex justify-between items-center"><label for="calc-weight" class="text-[11px] font-bold uppercase tracking-widest text-slate-500">Weight</label><span id="weight-display" class="text-sm font-extrabold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 tabular-nums">2.5 kg</span></div>
+                        <input type="range" id="calc-weight" min="0.5" max="50" step="0.5" value="2.5" class="w-full cursor-pointer mt-2" />
+                        <div class="flex justify-between text-[10px] font-semibold text-slate-400 px-0.5"><span>0.5 kg</span><span>25 kg</span><span>50 kg</span></div>
+                    </div>
+                </div>
+                <div class="lg:col-span-2 grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5" id="rates-container"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="border-t border-slate-200/70 bg-white" role="contentinfo">
+        <div class="max-w-7xl mx-auto px-6 py-7 flex flex-col md:flex-row items-center justify-between text-xs font-semibold text-slate-400 gap-4 text-center md:text-left">
+            <p id="footer-text">&copy; 2026 Nexus Logistics Inc. Built with modern UI frameworks.</p>
+            <div class="flex gap-7"><button onclick="NexusApp.showToast('Privacy Policy loaded.')" class="hover:text-slate-700 transition-colors">Privacy Policy</button><button onclick="NexusApp.showToast('Terms of Service loaded.')" class="hover:text-slate-700 transition-colors">Terms of Service</button></div>
+        </div>
+    </footer>
+
+    <!-- Public Modal -->
+    <div id="global-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300 p-4" onclick="NexusApp.closeModal()" aria-hidden="true">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300" id="modal-content-container" onclick="event.stopPropagation()">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/60"><h3 id="modal-title" class="font-extrabold text-lg text-slate-900">Modal Title</h3><button onclick="event.stopPropagation(); NexusApp.closeModal()" class="text-slate-400 hover:text-slate-700 bg-white rounded-full p-1.5 border border-slate-200 hover:border-slate-300 transition-all" aria-label="Close modal"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg></button></div>
+            <div id="modal-body" class="p-6"></div>
+        </div>
+    </div>
+
+    <!-- Admin Modal -->
+    <div id="admin-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300 p-4" onclick="NexusApp.closeAdminModal()" aria-hidden="true">
+        <div class="bg-white w-full max-w-5xl max-h-[88vh] overflow-y-auto rounded-3xl shadow-2xl transform scale-95 transition-transform duration-300 no-scrollbar" id="admin-content-container" onclick="event.stopPropagation()">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/60 sticky top-0 z-10 rounded-t-3xl"><h3 id="admin-modal-title" class="font-extrabold text-lg text-slate-900">Admin Panel</h3><button onclick="event.stopPropagation(); NexusApp.closeAdminModal()" class="text-slate-400 hover:text-slate-700 bg-white rounded-full p-1.5 border border-slate-200 hover:border-slate-300 transition-all" aria-label="Close admin"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg></button></div>
+            <div id="admin-body" class="p-6"></div>
+        </div>
+    </div>
+
+    <!-- Enterprise Modal -->
+    <div id="enterprise-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300 p-4" onclick="NexusApp.closeEnterpriseModal()" aria-hidden="true">
+        <div class="bg-white w-full max-w-6xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl transform scale-95 transition-transform duration-300 no-scrollbar" id="enterprise-content-container" onclick="event.stopPropagation()">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/60 sticky top-0 z-10 rounded-t-3xl"><h3 id="enterprise-modal-title" class="font-extrabold text-lg text-slate-900">Enterprise Portal</h3><button onclick="event.stopPropagation(); NexusApp.closeEnterpriseModal()" class="text-slate-400 hover:text-slate-700 bg-white rounded-full p-1.5 border border-slate-200 hover:border-slate-300 transition-all" aria-label="Close enterprise"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg></button></div>
+            <div id="enterprise-body" class="p-6"></div>
+        </div>
+    </div>
+
+    <!-- Toast container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none" aria-live="polite"></div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
