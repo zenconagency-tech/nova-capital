@@ -1,12 +1,12 @@
 {
-  "name": "projetrasta",
+  "name": "nexus-logistics",
   "version": "1.0.0",
-  "main": "index.js",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "echo 'Static site - no build step required'",
+    "test": "echo 'No tests configured'"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": ""
+  "engines": {
+    "node": ">=20"
+  }
 }
