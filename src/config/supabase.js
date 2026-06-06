@@ -1,8 +1,11 @@
 const { createClient } = require('@supabase/supabase-js');
+const WebSocket = require('ws');
 const config = require('./index');
 
 let supabase = null;
 let supabaseAdmin = null;
+
+const realtimeOpts = { transport: WebSocket };
 
 const initSupabase = () => {
   if (!config.supabase.url || !config.supabase.anonKey) {
@@ -14,11 +17,13 @@ const initSupabase = () => {
 
   supabase = createClient(config.supabase.url, config.supabase.anonKey, {
     auth: { persistSession: false, autoRefreshToken: false },
+    realtime: realtimeOpts,
   });
 
   if (config.supabase.serviceKey) {
     supabaseAdmin = createClient(config.supabase.url, config.supabase.serviceKey, {
       auth: { persistSession: false, autoRefreshToken: false },
+      realtime: realtimeOpts,
     });
   } else {
     console.warn(
