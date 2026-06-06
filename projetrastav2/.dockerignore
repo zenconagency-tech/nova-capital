@@ -1,0 +1,30 @@
+# Docker / build contexts
+node_modules
+npm-debug.log*
+.git
+.gitignore
+.github
+.DS_Store
+.env
+.env.*
+!.env.example
+*.log
+coverage
+.vscode
+.idea
+
+# Render / deploy files
+render.yaml
+Dockerfile
+.dockerignore
+netlify.toml
+_procfile
+
+# Docs that bloat the image
+README.md
+RENDER.md
+
+# Tests / scratch
+**/*.test.js
+**/*.spec.js
+/tmp

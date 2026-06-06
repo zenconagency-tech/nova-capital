@@ -60,9 +60,15 @@ app.use(
         frameAncestors: ["'self'"],
         objectSrc: ["'none'"],
         baseUri: ["'self'"],
+        formAction: ["'self'"],
+        // Force HTTPS in production (Render terminates TLS at the LB)
+        ...(config.isProduction ? { upgradeInsecureRequests: [] } : {}),
       },
     },
     crossOriginEmbedderPolicy: false,
+    // Allow cross-site cookies for the admin panel when accessed from
+    // a different subdomain (e.g. admin.nova-capital.com).
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
   })
 );
 
