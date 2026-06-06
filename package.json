@@ -1,12 +1,43 @@
 {
-  "name": "nexus-logistics",
+  "name": "nova-invest-platform",
   "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "build": "echo 'Static site - no build step required'",
-    "test": "echo 'No tests configured'"
-  },
+  "description": "Nova — premium full-stack investment platform (Node.js + Express + Supabase + JWT).",
+  "main": "server.js",
   "engines": {
-    "node": ">=20"
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "db:setup": "node scripts/setup-db.js",
+    "admin:seed": "node scripts/seed-admin.js"
+  },
+  "keywords": [
+    "investment",
+    "trading",
+    "fintech",
+    "express",
+    "supabase",
+    "jwt"
+  ],
+  "author": "Nova Capital",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4",
+    "bcrypt": "^5.1.1",
+    "compression": "^1.7.4",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "express-rate-limit": "^7.4.0",
+    "express-validator": "^7.2.0",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "nodemailer": "^6.9.15"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
   }
 }
