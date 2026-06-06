@@ -2,34 +2,22 @@
 #
 # Deploy with:  https://render.com/deploy?repo=https://github.com/zenconagency-tech/nova-capital
 # Or:           render blueprint launch  (in Render dashboard)
-#
-# Two services are declared:
-#   1. web  — the Node.js + Express app
-#   2. (optional) Redis if you want the maintenance cache to survive
-#      instance restarts.  Currently it uses an in-memory cache, so this
-#      is commented out — uncomment if/when you want cross-instance state.
-#
-# All secrets use `generateValue: true` so Render creates a strong random
-# string on first deploy.  You only need to fill in the Supabase + SMTP
-# values via the Render dashboard → Environment tab.
 
 services:
   - type: web
     name: nova-capital
-    runtime: node
+    env: node
     plan: free                     # change to "starter" ($7/mo) to disable sleep
     region: oregon
     branch: main
     buildCommand: npm install
-    startCommand: npm start
+    startCommand: node index.js
     healthCheckPath: /api/health
     autoDeploy: true
     envVars:
       # --- server ---
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 10000                # Render's default; harmless to keep
       - key: APP_NAME
         value: Nova Capital
       # APP_URL is auto-set by Render to the service's external URL
