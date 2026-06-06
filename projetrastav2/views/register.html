@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create your account · Nova Capital</title>
+  <meta name="theme-color" content="#0A0B0E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1' y1='0' y2='1'%3E%3Cstop offset='0' stop-color='%2300D4FF'/%3E%3Cstop offset='1' stop-color='%23A78BFA'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Ctext x='16' y='22' font-family='Inter,sans-serif' font-size='18' font-weight='800' fill='%230A0B0E' text-anchor='middle'%3EN%3C/text%3E%3C/svg%3E" />
+</head>
+<body>
+  <div class="auth-page">
+    <div class="auth-card fade-in">
+      <a href="/" class="logo" style="justify-content:center; margin-bottom:20px; display:flex;">
+        <span class="logo-mark"></span>
+        <span>Nova<span style="color:var(--accent)">.</span></span>
+      </a>
+
+      <div class="head">
+        <h1>Create your account</h1>
+        <p>Start trading in under 2 minutes.</p>
+      </div>
+
+      <div id="alert"></div>
+
+      <form id="registerForm" novalidate>
+        <div class="form-group">
+          <label for="fullName">Full name</label>
+          <input id="fullName" name="fullName" type="text" class="input" placeholder="Ada Lovelace" autocomplete="name" />
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" class="input" placeholder="you@example.com" required autocomplete="email" />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" class="input" placeholder="At least 8 characters" required autocomplete="new-password" minlength="8" />
+          <div class="pw-meter" id="pwMeter" data-strength="0">
+            <div class="seg"></div><div class="seg"></div><div class="seg"></div><div class="seg"></div>
+          </div>
+          <div class="pw-hint" id="pwHint">Use 8+ characters with letters and numbers.</div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirm password</label>
+          <input id="confirmPassword" name="confirmPassword" type="password" class="input" placeholder="Repeat your password" required autocomplete="new-password" minlength="8" />
+        </div>
+
+        <label style="display:flex; align-items:flex-start; gap:8px; color:var(--text-2); font-size:13px; margin-bottom:18px;">
+          <input type="checkbox" class="checkbox" id="terms" required />
+          <span>I agree to the <a href="#" style="color:var(--accent)">Terms</a> and <a href="#" style="color:var(--accent)">Privacy Policy</a>.</span>
+        </label>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg" id="submitBtn">
+          Create account
+        </button>
+      </form>
+
+      <div class="footer-link" style="margin-top:18px;">
+        Already have an account? <a href="/login">Log in</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/toast.js"></script>
+  <script>
+    const form = document.getElementById('registerForm');
+    const alertEl = document.getElementById('alert');
+    const btn = document.getElementById('submitBtn');
+    const pw = document.getElementById('password');
+    const meter = document.getElementById('pwMeter');
+    const hint = document.getElementById('pwHint');
+
+    if (NovaAPI.getToken()) {
+      location.replace('/dashboard');
+    }
+
+    const showAlert = (type, msg) => { alertEl.innerHTML = `<div class="alert ${type}">${msg}</div>`; };
+
+    const strength = (v) => {
+      let s = 0;
+      if (v.length >= 8) s++;
+      if (/[A-Z]/.test(v) && /[a-z]/.test(v)) s++;
+      if (/[0-9]/.test(v)) s++;
+      if (/[^A-Za-z0-9]/.test(v) && v.length >= 10) s++;
+      return s;
+    };
+
+    pw.addEventListener('input', () => {
+      const s = strength(pw.value);
+      meter.dataset.strength = s;
+      const labels = ['Too short', 'Weak', 'Fair', 'Good', 'Strong'];
+      hint.textContent = pw.value ? `Strength: ${labels[s]}` : 'Use 8+ characters with letters and numbers.';
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      alertEl.innerHTML = '';
+
+      const fullName = form.fullName.value.trim();
+      const email = form.email.value.trim();
+      const password = pw.value;
+      const confirmPassword = form.confirmPassword.value;
+      const terms = document.getElementById('terms').checked;
+
+      if (!email || !password || !confirmPassword) {
+        return NovaToast.warning('Please fill in all fields.');
+      }
+      if (password.length < 8) return NovaToast.warning('Password must be at least 8 characters.');
+      if (password !== confirmPassword) return NovaToast.error('Passwords do not match.');
+      if (!terms) return NovaToast.warning('Please accept the terms to continue.');
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Creating account...';
+
+      try {
+        const { data, message } = await NovaAPI.register({ email, password, fullName, confirmPassword });
+        if (data.verification && data.verification.autoVerified) {
+          // No SMTP configured — auto-verified. Sign the user in directly.
+          const { data: login } = await NovaAPI.login({ email, password });
+          NovaAPI.setToken(login.token);
+          NovaToast.success('Account created. You are now signed in.');
+          setTimeout(() => location.replace('/dashboard'), 250);
+          return;
+        }
+        NovaToast.success(message || 'Account created. Please check your email to verify your account.');
+        btn.disabled = false;
+        btn.textContent = 'Create account';
+        form.reset();
+        showAlert('info', `Didn't get the email? <a href="#" id="resendLink" style="color:var(--accent); font-weight:500;">Resend verification email</a>`);
+        document.getElementById('resendLink').addEventListener('click', async (ev) => {
+          ev.preventDefault();
+          try {
+            await NovaAPI.resendVerification(email);
+            NovaToast.info('Verification email re-sent (check spam folder).');
+          } catch (_) { /* ignore */ }
+        });
+      } catch (err) {
+        NovaToast.error(err.message || 'Signup failed');
+        btn.disabled = false;
+        btn.textContent = 'Create account';
+      }
+    });
+  </script>
+</body>
+</html>

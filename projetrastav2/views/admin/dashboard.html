@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin · Nova Capital</title>
+  <meta name="theme-color" content="#0A0B0E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/admin.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1' y1='0' y2='1'%3E%3Cstop offset='0' stop-color='%2300D4FF'/%3E%3Cstop offset='1' stop-color='%23A78BFA'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Ctext x='16' y='22' font-family='Inter,sans-serif' font-size='18' font-weight='800' fill='%230A0B0E' text-anchor='middle'%3EN%3C/text%3E%3C/svg%3E" />
+</head>
+<body class="admin-body">
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar" id="adminSidebar">
+    <a href="/" class="sidebar-brand">
+      <span class="logo-mark"></span>
+      <span>Nova<span style="color:var(--accent)">.</span></span>
+      <span class="admin-tag">Admin</span>
+    </a>
+
+    <nav class="admin-nav" aria-label="Admin sections">
+      <button class="active" data-section="overview">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+        <span>Overview</span>
+      </button>
+      <button data-section="users">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Users</span>
+        <span class="nav-count" id="navUsersCount">—</span>
+      </button>
+      <button data-section="withdrawals">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <span>Withdrawals</span>
+        <span class="nav-count" id="navWdCount">—</span>
+      </button>
+      <button data-section="settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Settings</span>
+      </button>
+      <button data-section="account">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Account</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="/" class="back-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        <span>Back to site</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- Topbar + content -->
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <div style="display:flex; align-items:center; gap:14px;">
+        <button class="sidebar-toggle" id="sidebarToggle" aria-label="Open menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <h1 id="pageTitle">Overview</h1>
+      </div>
+      <div class="admin-actions">
+        <span class="text-dim" style="font-size:13.5px;">Signed in as <b id="adminUserName" style="color:var(--text-0);">—</b></span>
+        <button id="adminLogout" class="btn btn-secondary btn-sm">Sign out</button>
+      </div>
+    </header>
+
+    <div class="admin-content">
+      <!-- ============== OVERVIEW ============== -->
+      <section class="admin-section active" id="sec-overview">
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="l">Total users</div>
+            <div class="v" id="sUsers">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="l">Verified users</div>
+            <div class="v profit" id="sVerified">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="l">Total balance held</div>
+            <div class="v gold" id="sBalance">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="l">All withdrawals</div>
+            <div class="v" id="sTotalWd">—</div>
+          </div>
+        </div>
+
+        <h3 class="block-title">Withdrawals by status</h3>
+        <div class="stat-grid" style="grid-template-columns: repeat(5, 1fr);">
+          <div class="stat-card wd">
+            <div class="l">Pending</div>
+            <div class="v gold" id="sPending">—</div>
+          </div>
+          <div class="stat-card wd">
+            <div class="l">Approved</div>
+            <div class="v profit" id="sApproved">—</div>
+          </div>
+          <div class="stat-card wd">
+            <div class="l">Rejected</div>
+            <div class="v loss" id="sRejected">—</div>
+          </div>
+          <div class="stat-card wd">
+            <div class="l">On hold</div>
+            <div class="v" id="sOnHold" style="color:var(--accent)">—</div>
+          </div>
+          <div class="stat-card wd">
+            <div class="l">Restored</div>
+            <div class="v" id="sRestored" style="color:var(--purple)">—</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== USERS ============== -->
+      <section class="admin-section" id="sec-users">
+        <div class="toolbar">
+          <input id="userSearch" class="input" placeholder="Search by name or email…" />
+          <button class="btn btn-secondary btn-sm" id="userSearchBtn">Search</button>
+          <select id="userTierFilter" class="select" style="max-width:160px;">
+            <option value="">All tiers</option>
+            <option value="free">Free</option>
+            <option value="pro">Pro</option>
+            <option value="elite">Elite</option>
+          </select>
+          <select id="userRestrictedFilter" class="select" style="max-width:160px;">
+            <option value="">All statuses</option>
+            <option value="false">Active</option>
+            <option value="true">Restricted</option>
+          </select>
+          <span class="text-dim" id="usersTotal" style="margin-left:auto;"></span>
+        </div>
+
+        <div class="admin-table">
+          <div class="row head">
+            <div>User</div>
+            <div>Email</div>
+            <div>Tier</div>
+            <div>Status</div>
+            <div class="num">Balance</div>
+            <div>Actions</div>
+          </div>
+          <div id="usersList"></div>
+        </div>
+      </section>
+
+      <!-- ============== WITHDRAWALS ============== -->
+      <section class="admin-section" id="sec-withdrawals">
+        <div class="toolbar">
+          <select id="wdFilter" class="select" style="max-width:180px;">
+            <option value="">All statuses</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="on_hold">On hold</option>
+            <option value="rejected">Rejected</option>
+            <option value="restored">Restored</option>
+          </select>
+          <button class="btn btn-secondary btn-sm" id="wdFilterBtn">Apply</button>
+          <input id="wdSearch" class="input" placeholder="Search by name / email / destination…" style="max-width:300px;" />
+          <span class="text-dim" id="wdTotal" style="margin-left:auto;"></span>
+        </div>
+
+        <div class="admin-table">
+          <div class="row head">
+            <div>Requested</div>
+            <div>User</div>
+            <div class="num">Amount</div>
+            <div>Method</div>
+            <div>Destination</div>
+            <div>Status</div>
+            <div>Actions</div>
+          </div>
+          <div id="wdList"></div>
+        </div>
+      </section>
+
+      <!-- ============== SETTINGS ============== -->
+      <section class="admin-section" id="sec-settings">
+        <div class="settings-grid">
+          <div class="card setting-card">
+            <h3>Maintenance mode</h3>
+            <p class="text-dim" style="margin:0 0 16px; font-size:13.5px;">
+              When on, all user-facing API requests are blocked with 503. Admins always retain access.
+            </p>
+            <label class="switch-row">
+              <span>Enabled</span>
+              <label class="switch">
+                <input type="checkbox" id="maintToggle" />
+                <span class="slider"></span>
+              </label>
+            </label>
+          </div>
+
+          <div class="card setting-card">
+            <h3>Hero copy</h3>
+            <p class="text-dim" style="margin:0 0 16px; font-size:13.5px;">
+              Editable headline and subtext for the landing page hero. HTML is allowed (e.g. <code>&lt;span class="grad"&gt;…&lt;/span&gt;</code>).
+            </p>
+            <div class="form-group" style="margin:0 0 12px;">
+              <label>Headline</label>
+              <textarea id="heroHeadline" class="input" rows="3"></textarea>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label>Subtext</label>
+              <textarea id="heroSubtext" class="input" rows="3"></textarea>
+            </div>
+          </div>
+
+          <div class="card setting-card" style="grid-column: 1 / -1;">
+            <h3>Market categories</h3>
+            <p class="text-dim" style="margin:0 0 16px; font-size:13.5px;">
+              Choose which categories are visible on the homepage.
+            </p>
+            <div class="toggle-list" id="catsList"></div>
+          </div>
+
+          <div class="card setting-card" style="grid-column: 1 / -1;">
+            <h3>Pricing plans</h3>
+            <p class="text-dim" style="margin:0 0 16px; font-size:13.5px;">
+              Edit plan name, tagline, price, period, description, and CTA. Feature lists stay as currently saved.
+            </p>
+            <div class="pricing-grid" id="pricingList"></div>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:18px;">
+          <button class="btn btn-primary" id="saveSettingsBtn">Save settings</button>
+        </div>
+      </section>
+
+      <!-- ============== ACCOUNT ============== -->
+      <section class="admin-section" id="sec-account">
+        <div class="card setting-card" style="max-width:520px;">
+          <h3>Change admin password</h3>
+          <p class="text-dim" style="margin:0 0 18px; font-size:13.5px;">
+            Enter your current password and a new one (min 8 characters).
+          </p>
+          <form id="accountForm" novalidate>
+            <div class="form-group">
+              <label for="apCurrent">Current password</label>
+              <input id="apCurrent" type="password" class="input" required autocomplete="current-password" />
+            </div>
+            <div class="form-group">
+              <label for="apNew">New password</label>
+              <input id="apNew" type="password" class="input" minlength="8" required autocomplete="new-password" />
+            </div>
+            <div class="form-group">
+              <label for="apConfirm">Confirm new password</label>
+              <input id="apConfirm" type="password" class="input" minlength="8" required autocomplete="new-password" />
+            </div>
+            <button class="btn btn-primary" type="submit">Update password</button>
+          </form>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ============== MODALS ============== -->
+  <div class="modal-backdrop" id="balanceModal">
+    <div class="modal">
+      <h3>Set user balance</h3>
+      <p class="text-dim" id="balUserLabel" style="margin:0 0 16px; font-size:13.5px;"></p>
+      <form id="balanceForm">
+        <div class="form-group">
+          <label for="balAmount">New balance (USD)</label>
+          <input id="balAmount" type="number" step="0.01" min="0" class="input" required />
+        </div>
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+          <button type="button" class="btn btn-ghost" id="balCancel">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update balance</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="editModal">
+    <div class="modal">
+      <h3>Edit user</h3>
+      <form id="editForm">
+        <input type="hidden" id="editUid" />
+        <div class="form-group">
+          <label for="editName">Full name</label>
+          <input id="editName" class="input" type="text" />
+        </div>
+        <div class="form-group">
+          <label for="editEmail">Email</label>
+          <input id="editEmail" class="input" type="email" />
+        </div>
+        <div class="form-group">
+          <label for="editTier">Account tier</label>
+          <select id="editTier" class="select">
+            <option value="free">Free</option>
+            <option value="pro">Pro</option>
+            <option value="elite">Elite</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="editBalance">Balance (USD)</label>
+          <input id="editBalance" type="number" step="0.01" min="0" class="input" />
+        </div>
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+          <button type="button" class="btn btn-ghost" id="editCancel">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="viewModal">
+    <div class="modal" style="max-width:640px;">
+      <div style="display:flex; align-items:start; justify-content:space-between; gap:12px;">
+        <h3 style="margin:0;">User details</h3>
+        <button id="viewClose" class="btn btn-ghost btn-sm" aria-label="Close" style="padding:6px 10px;">✕</button>
+      </div>
+      <div class="user-detail" style="margin:14px 0 22px;">
+        <div class="row"><div class="l">Name</div><div class="v" id="viewName">—</div></div>
+        <div class="row"><div class="l">Email</div><div class="v" id="viewEmail">—</div></div>
+        <div class="row"><div class="l">Tier</div><div class="v" id="viewTier">—</div></div>
+        <div class="row"><div class="l">Status</div><div class="v" id="viewStatus">—</div></div>
+        <div class="row"><div class="l">Balance</div><div class="v" id="viewBalance">—</div></div>
+        <div class="row"><div class="l">Created</div><div class="v" id="viewCreated">—</div></div>
+        <div class="row"><div class="l">Last login</div><div class="v" id="viewLastLogin">—</div></div>
+      </div>
+      <h4 style="margin:0 0 10px; color:var(--text-0); font-size:14px;">Withdrawal history</h4>
+      <div style="max-height:240px; overflow:auto; border:1px solid var(--border); border-radius:8px;">
+        <table class="holdings-table" style="margin:0;">
+          <thead>
+            <tr><th>Date</th><th class="num">Amount</th><th>Status</th><th>Notes</th></tr>
+          </thead>
+          <tbody id="viewUserWdBody">
+            <tr><td colspan="4" class="text-dim center" style="padding:16px;">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:18px;">
+        <button class="btn btn-secondary" id="viewUserBtn">Edit user</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/format.js"></script>
+  <script src="/js/toast.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>
