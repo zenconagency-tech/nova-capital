@@ -145,24 +145,6 @@
       });
     }
 
-    // Pricing plans — replace the static grid
-    const grid = document.getElementById('pricingGrid');
-    if (grid && Array.isArray(settings.pricing_plans) && settings.pricing_plans.length) {
-      const check = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>';
-      grid.innerHTML = settings.pricing_plans.map((p) => `
-        <div class="card pricing-card ${p.featured ? 'featured' : ''}">
-          ${p.featured ? '<div class="badge">MOST POPULAR</div>' : ''}
-          <h3>${escapeHtml(p.name)}</h3>
-          <div class="tier">${escapeHtml(p.tier || '')}</div>
-          <div class="price"><span class="amt">$${Number(p.price || 0)}</span><span class="per">/ ${escapeHtml(p.period || 'month')}</span></div>
-          <div class="desc">${escapeHtml(p.description || '')}</div>
-          <ul>
-            ${(p.features || []).map((f) => `<li>${check} ${escapeHtml(f)}</li>`).join('')}
-          </ul>
-          <a href="/register" class="btn ${p.featured ? 'btn-primary' : 'btn-secondary'} btn-block">${escapeHtml(p.cta || 'Get started')}</a>
-        </div>
-      `).join('');
-    }
   };
   applySettings();
 
