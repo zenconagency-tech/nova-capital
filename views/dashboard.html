@@ -883,11 +883,6 @@
       }
     });
 
-    const statusPill = (s) => {
-      const labels = { pending: 'Pending', approved: 'Approved', rejected: 'Rejected' };
-      return `<span class="status-pill status-${s}"><span class="dot"></span>${labels[s] || s}</span>`;
-    };
-
     const renderDeposits = async () => {
       try {
         const { data: { deposits = [] } } = await NovaAPI.deposits();
