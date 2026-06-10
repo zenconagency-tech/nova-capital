@@ -37,6 +37,20 @@
         <span>Withdrawals</span>
         <span class="nav-count" id="navWdCount">—</span>
       </button>
+      <button data-section="deposits">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <span>Deposits</span>
+        <span class="nav-count" id="navDepCount">—</span>
+      </button>
+      <button data-section="plans">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 8.5 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 9 8.5 12 2"/></svg>
+        <span>Investment Plans</span>
+      </button>
+      <button data-section="user-investments">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/></svg>
+        <span>User Investments</span>
+        <span class="nav-count" id="navInvCount">—</span>
+      </button>
       <button data-section="settings">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         <span>Settings</span>
@@ -115,6 +129,24 @@
             <div class="v" id="sRestored" style="color:var(--purple)">—</div>
           </div>
         </div>
+
+        <h3 class="block-title">Deposits by status</h3>
+        <div class="stat-grid" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="stat-card wd">
+            <div class="l">Pending</div>
+            <div class="v gold" id="sDepPending">—</div>
+          </div>
+          <div class="stat-card wd">
+            <div class="l">Approved</div>
+            <div class="v profit" id="sDepApproved">—</div>
+          </div>
+          <div class="stat-card wd">
+            <div class="l">Rejected</div>
+            <div class="v loss" id="sDepRejected">—</div>
+          </div>
+            <div class="v" id="sRestored" style="color:var(--purple)">—</div>
+          </div>
+        </div>
       </section>
 
       <!-- ============== USERS ============== -->
@@ -179,6 +211,83 @@
         </div>
       </section>
 
+      <!-- ============== DEPOSITS ============== -->
+      <section class="admin-section" id="sec-deposits">
+        <div class="toolbar">
+          <select id="depFilter" class="select" style="max-width:180px;">
+            <option value="">All statuses</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+          </select>
+          <button class="btn btn-secondary btn-sm" id="depFilterBtn">Apply</button>
+          <input id="depSearch" class="input" placeholder="Search by name / email…" style="max-width:300px;" />
+          <span class="text-dim" id="depTotal" style="margin-left:auto;"></span>
+        </div>
+
+        <div class="admin-table">
+          <div class="row head">
+            <div>Requested</div>
+            <div>User</div>
+            <div class="num">Amount</div>
+            <div>Method</div>
+            <div>Status</div>
+            <div>Actions</div>
+          </div>
+          <div id="depList"></div>
+        </div>
+      </section>
+
+      <!-- ============== INVESTMENT PLANS ============== -->
+      <section class="admin-section" id="sec-plans">
+        <div class="toolbar">
+          <span class="text-dim" style="margin-right:auto;">Manage investment tiers</span>
+          <button class="btn btn-primary btn-sm" id="addPlanBtn">+ Add New Plan</button>
+        </div>
+
+        <div class="admin-table">
+          <div class="row head">
+            <div>Name</div>
+            <div class="num">Min</div>
+            <div class="num">Max</div>
+            <div class="num">Daily ROI</div>
+            <div class="num">Duration</div>
+            <div>Status</div>
+            <div>Actions</div>
+          </div>
+          <div id="planList"></div>
+        </div>
+      </section>
+
+      <!-- ============== USER INVESTMENTS ============== -->
+      <section class="admin-section" id="sec-user-investments">
+        <div class="toolbar">
+          <select id="invFilter" class="select" style="max-width:180px;">
+            <option value="">All statuses</option>
+            <option value="active">Active</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <button class="btn btn-secondary btn-sm" id="invFilterBtn">Apply</button>
+          <input id="invSearch" class="input" placeholder="Search by name / email…" style="max-width:300px;" />
+          <span class="text-dim" id="invTotal" style="margin-left:auto;"></span>
+        </div>
+
+        <div class="admin-table">
+          <div class="row head">
+            <div>Date</div>
+            <div>User</div>
+            <div class="num">Amount</div>
+            <div class="num">ROI Earned</div>
+            <div class="num">Expected Return</div>
+            <div>Plan</div>
+            <div>Duration</div>
+            <div>Status</div>
+          </div>
+          <div id="invList"></div>
+        </div>
+      </section>
+
       <!-- ============== SETTINGS ============== -->
       <section class="admin-section" id="sec-settings">
         <div class="settings-grid">
@@ -225,6 +334,60 @@
               Edit plan name, tagline, price, period, description, and CTA. Feature lists stay as currently saved.
             </p>
             <div class="pricing-grid" id="pricingList"></div>
+          </div>
+        </div>
+
+        <div class="card setting-card" style="grid-column: 1 / -1;">
+          <h3>Deposit wallet addresses</h3>
+          <p class="text-dim" style="margin:0 0 16px; font-size:13.5px;">
+            These addresses are shown to users when they request a crypto deposit. Emailed on deposit request.
+          </p>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+            <div class="form-group">
+              <label>Bitcoin wallet address</label>
+              <input id="walletBitcoin" class="input" type="text" style="font-family:var(--font-mono); font-size:12px;" />
+            </div>
+            <div class="form-group">
+              <label>Ethereum / USDT wallet address</label>
+              <input id="walletEthereum" class="input" type="text" style="font-family:var(--font-mono); font-size:12px;" />
+            </div>
+            <div class="form-group">
+              <label>PayPal email</label>
+              <input id="walletPaypal" class="input" type="email" />
+            </div>
+            <div class="form-group">
+              <label>Payoneer email</label>
+              <input id="walletPayoneer" class="input" type="email" />
+            </div>
+          </div>
+        </div>
+
+        <div class="card setting-card" style="grid-column: 1 / -1;">
+          <h3>Investment ROI rates</h3>
+          <p class="text-dim" style="margin:0 0 16px; font-size:13.5px;">
+            Expected return percentage per investment duration. These are used when a user confirms an investment.
+          </p>
+          <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:12px;">
+            <div class="form-group">
+              <label>1 Month (%)</label>
+              <input id="roi30" class="input" type="number" min="0" step="0.1" />
+            </div>
+            <div class="form-group">
+              <label>3 Months (%)</label>
+              <input id="roi60" class="input" type="number" min="0" step="0.1" />
+            </div>
+            <div class="form-group">
+              <label>6 Months (%)</label>
+              <input id="roi90" class="input" type="number" min="0" step="0.1" />
+            </div>
+            <div class="form-group">
+              <label>12 Months (%)</label>
+              <input id="roi180" class="input" type="number" min="0" step="0.1" />
+            </div>
+            <div class="form-group">
+              <label>24 Months (%)</label>
+              <input id="roi365" class="input" type="number" min="0" step="0.1" />
+            </div>
           </div>
         </div>
 
@@ -337,9 +500,70 @@
           </tbody>
         </table>
       </div>
+      <h4 style="margin:10px 0 10px; color:var(--text-0); font-size:14px;">Investment history</h4>
+      <div style="max-height:240px; overflow:auto; border:1px solid var(--border); border-radius:8px;">
+        <table class="holdings-table" style="margin:0;">
+          <thead>
+            <tr><th>Date</th><th>Plan</th><th class="num">Amount</th><th class="num">ROI Earned</th><th class="num">Return</th><th>Status</th></tr>
+          </thead>
+          <tbody id="viewUserInvBody">
+            <tr><td colspan="6" class="text-dim center" style="padding:16px;">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
       <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:18px;">
         <button class="btn btn-secondary" id="viewUserBtn">Edit user</button>
       </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="planModal">
+    <div class="modal" style="max-width:560px;">
+      <h3 id="planModalTitle">Add Investment Plan</h3>
+      <form id="planForm">
+        <input type="hidden" id="planId" />
+        <div class="form-group">
+          <label for="planName">Plan Name</label>
+          <input id="planName" class="input" type="text" required />
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="planMin">Minimum Amount ($)</label>
+            <input id="planMin" type="number" min="0.01" step="0.01" class="input" required />
+          </div>
+          <div class="form-group">
+            <label for="planMax">Maximum Amount ($) <span class="text-dim">(optional)</span></label>
+            <input id="planMax" type="number" min="0" step="0.01" class="input" placeholder="No limit" />
+          </div>
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="planRoi">Daily ROI (%)</label>
+            <input id="planRoi" type="number" min="0.01" step="0.01" class="input" required />
+          </div>
+          <div class="form-group">
+            <label for="planDuration">Duration (days)</label>
+            <input id="planDuration" type="number" min="1" step="1" class="input" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="planFeatures">Features <span class="text-dim">(one per line)</span></label>
+          <textarea id="planFeatures" class="input" rows="4" placeholder="Feature 1&#10;Feature 2&#10;Feature 3"></textarea>
+        </div>
+        <div class="form-row checkbox-row">
+          <label class="switch-row" style="justify-content:flex-start;">
+            <span>Active</span>
+            <label class="switch">
+              <input type="checkbox" id="planActive" checked />
+              <span class="slider"></span>
+            </label>
+          </label>
+        </div>
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+          <button type="button" class="btn btn-ghost" id="planCancel">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Plan</button>
+        </div>
+      </form>
     </div>
   </div>
 

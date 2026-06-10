@@ -18,21 +18,38 @@ create extension if not exists "pgcrypto";
 -- users
 -- ---------------------------------------------------------------------------
 create table if not exists public.users (
-  id              uuid primary key default gen_random_uuid(),
-  full_name       text,
-  email           text unique not null,
-  password_hash   text not null,
-  email_verified  boolean not null default false,
-  is_restricted   boolean not null default false,
-  account_tier    text not null default 'free' check (account_tier in ('free','pro','elite')),
-  balance         numeric(18, 2) not null default 0.00,
-  avatar_url      text,
-  last_login_at   timestamptz,
-  created_at      timestamptz not null default now(),
-  updated_at      timestamptz not null default now()
+  id                      uuid primary key default gen_random_uuid(),
+  first_name              text,
+  last_name               text,
+  full_name               text,
+  email                   text unique not null,
+  password_hash           text not null,
+  phone                   text,
+  date_of_birth           date,
+  street                  text,
+  city                    text,
+  state                   text,
+  zip                     text,
+  ssn_last4               text,
+  employment_status       text check (employment_status in ('employed','self_employed','unemployed','student','retired')),
+  annual_income           text check (annual_income in ('under_25k','25k_50k','50k_100k','100k_250k','250k_plus')),
+  email_verified          boolean not null default false,
+  is_restricted           boolean not null default false,
+  account_tier            text not null default 'free' check (account_tier in ('free','pro','elite')),
+  balance                 numeric(18, 2) not null default 0.00,
+  avatar_url              text,
+  last_login_at           timestamptz,
+  application_status      text not null default 'approved' check (application_status in ('pending','approved','rejected')),
+  application_submitted_at timestamptz,
+  application_reviewed_at  timestamptz,
+  application_reviewed_by  uuid references public.admin(id),
+  rejection_reason         text,
+  created_at              timestamptz not null default now(),
+  updated_at              timestamptz not null default now()
 );
 
 create index if not exists users_email_idx on public.users (lower(email));
+create index if not exists users_application_status_idx on public.users (application_status);
 
 -- ---------------------------------------------------------------------------
 -- withdrawals
@@ -134,7 +151,15 @@ insert into public.site_settings (key, value) values
       "featured": false,
       "cta": "Contact sales"
     }
-  ]'::jsonb)
+  ]'::jsonb),
+  ('deposit_wallets',   '{
+    "bitcoin": "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
+    "ethereum": "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD18",
+    "usdt": "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD18",
+    "paypal_email": "payments@novacapital.com",
+    "payoneer_email": "payments@novacapital.com"
+  }'::jsonb),
+  ('investment_roi',    '{"30": 5, "60": 12, "90": 22, "180": 40, "365": 60}'::jsonb)
 on conflict (key) do nothing;
 
 -- ---------------------------------------------------------------------------
@@ -168,6 +193,70 @@ create table if not exists public.watchlist (
 );
 
 -- ---------------------------------------------------------------------------
+-- deposits
+-- ---------------------------------------------------------------------------
+create table if not exists public.deposits (
+  id            uuid primary key default gen_random_uuid(),
+  user_id       uuid not null references public.users(id) on delete cascade,
+  amount        numeric(18, 2) not null check (amount > 0),
+  status        text not null default 'pending'
+                check (status in ('pending','approved','rejected')),
+  method        text not null,
+  method_meta   jsonb,
+  notes         text,
+  requested_at  timestamptz not null default now(),
+  updated_at    timestamptz not null default now()
+);
+
+create index if not exists deposits_user_idx on public.deposits (user_id);
+create index if not exists deposits_status_idx on public.deposits (status);
+
+-- ---------------------------------------------------------------------------
+-- investment_plans  (admin-managed tier definitions)
+-- ---------------------------------------------------------------------------
+create table if not exists public.investment_plans (
+  id            uuid primary key default gen_random_uuid(),
+  name          text not null,
+  min_amount    numeric(18, 2) not null default 100,
+  max_amount    numeric(18, 2),
+  daily_roi     numeric(5, 2) not null,
+  duration_days integer not null,
+  features      jsonb not null default '[]'::jsonb,
+  is_active     boolean not null default true,
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now()
+);
+
+-- Seed default investment plans
+insert into public.investment_plans (name, min_amount, max_amount, daily_roi, duration_days, features) values
+  ('Starter', 100, 999, 1.5, 30, '["Basic support", "Weekly reports"]'),
+  ('Silver', 1000, 4999, 2.5, 60, '["Priority support", "Daily reports", "Auto-compounding"]'),
+  ('Gold', 5000, 19999, 3.8, 90, '["Dedicated manager", "Daily reports", "Auto-compounding", "Referral bonus"]'),
+  ('Platinum', 20000, null, 5.5, 180, '["VIP manager", "Real-time reports", "Auto-compounding", "Priority withdrawals", "Referral bonus"]')
+on conflict do nothing;
+
+-- ---------------------------------------------------------------------------
+-- user_investments  (user investment records)
+-- ---------------------------------------------------------------------------
+create table if not exists public.user_investments (
+  id              uuid primary key default gen_random_uuid(),
+  user_id         uuid not null references public.users(id) on delete cascade,
+  plan_id         uuid references public.investment_plans(id),
+  asset_label     text not null,
+  amount          numeric(18, 2) not null check (amount > 0),
+  duration_days   integer not null,
+  expected_return numeric(18, 2) not null default 0,
+  status          text not null default 'active'
+                  check (status in ('active','completed','cancelled')),
+  last_roi_at     timestamptz,
+  roi_earned_so_far numeric(18, 2) not null default 0.00,
+  created_at      timestamptz not null default now(),
+  updated_at      timestamptz not null default now()
+);
+
+create index if not exists user_investments_user_idx on public.user_investments (user_id);
+
+-- ---------------------------------------------------------------------------
 -- updated_at trigger
 -- ---------------------------------------------------------------------------
 create or replace function public.set_updated_at()
@@ -194,6 +283,18 @@ begin
   end if;
   if not exists (select 1 from pg_trigger where tgname = 'site_settings_set_updated_at') then
     create trigger site_settings_set_updated_at before update on public.site_settings
+      for each row execute function public.set_updated_at();
+  end if;
+  if not exists (select 1 from pg_trigger where tgname = 'deposits_set_updated_at') then
+    create trigger deposits_set_updated_at before update on public.deposits
+      for each row execute function public.set_updated_at();
+  end if;
+  if not exists (select 1 from pg_trigger where tgname = 'investment_plans_set_updated_at') then
+    create trigger investment_plans_set_updated_at before update on public.investment_plans
+      for each row execute function public.set_updated_at();
+  end if;
+  if not exists (select 1 from pg_trigger where tgname = 'user_investments_set_updated_at') then
+    create trigger user_investments_set_updated_at before update on public.user_investments
       for each row execute function public.set_updated_at();
   end if;
 end$$;

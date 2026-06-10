@@ -495,4 +495,260 @@ const SiteSettings = {
   },
 };
 
-module.exports = { Users, Holdings, Watchlist, Withdrawals, EmailTokens, Admin, SiteSettings };
+// ---------------------------------------------------------------------------
+// Deposits
+// ---------------------------------------------------------------------------
+const Deposits = {
+  async listByUser(userId, limit = 50) {
+    const { data, error } = await useAdmin()
+      .from('deposits')
+      .select('*')
+      .eq('user_id', userId)
+      .order('requested_at', { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    return data || [];
+  },
+
+  async listAll({ limit = 200, status = null, search = '' } = {}) {
+    let q = useAdmin()
+      .from('deposits')
+      .select('*, users:user_id ( id, full_name, email )')
+      .order('requested_at', { ascending: false })
+      .limit(limit);
+    if (status) q = q.eq('status', status);
+    const { data, error } = await q;
+    if (error) throw error;
+    let rows = data || [];
+    if (search) {
+      const s = search.toLowerCase();
+      rows = rows.filter(
+        (d) =>
+          (d.users?.email || '').toLowerCase().includes(s) ||
+          (d.users?.full_name || '').toLowerCase().includes(s)
+      );
+    }
+    return rows;
+  },
+
+  async findById(id) {
+    const { data, error } = await useAdmin()
+      .from('deposits')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+    if (error) throw error;
+    return data;
+  },
+
+  async create({ userId, amount, method, methodMeta = null, notes = null }) {
+    const { data, error } = await useAdmin()
+      .from('deposits')
+      .insert({
+        user_id: userId,
+        amount,
+        method,
+        method_meta: methodMeta,
+        notes,
+      })
+      .select('*')
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async setStatus(id, status, notes = null) {
+    const update = { status };
+    if (notes !== null) update.notes = notes;
+    const { data, error } = await useAdmin()
+      .from('deposits')
+      .update(update)
+      .eq('id', id)
+      .select('*')
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async countAll() {
+    const { count, error } = await useAdmin()
+      .from('deposits')
+      .select('*', { count: 'exact', head: true });
+    if (error) throw error;
+    return count || 0;
+  },
+
+  async countByStatus(status) {
+    const { count, error } = await useAdmin()
+      .from('deposits')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', status);
+    if (error) throw error;
+    return count || 0;
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Investment Plans
+// ---------------------------------------------------------------------------
+const InvestmentPlans = {
+  async listAll() {
+    const { data, error } = await useAdmin()
+      .from('investment_plans')
+      .select('*')
+      .order('min_amount', { ascending: true });
+    if (error) throw error;
+    return data || [];
+  },
+
+  async findById(id) {
+    const { data, error } = await useAdmin()
+      .from('investment_plans')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+    if (error) throw error;
+    return data;
+  },
+
+  async create({ name, minAmount, maxAmount, dailyRoi, durationDays, features, isActive }) {
+    const { data, error } = await useAdmin()
+      .from('investment_plans')
+      .insert({
+        name,
+        min_amount: minAmount,
+        max_amount: maxAmount || null,
+        daily_roi: dailyRoi,
+        duration_days: durationDays,
+        features: features || [],
+        is_active: isActive !== false,
+      })
+      .select('*')
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async update(id, { name, minAmount, maxAmount, dailyRoi, durationDays, features, isActive }) {
+    const update = {};
+    if (name !== undefined) update.name = name;
+    if (minAmount !== undefined) update.min_amount = minAmount;
+    if (maxAmount !== undefined) update.max_amount = maxAmount;
+    if (dailyRoi !== undefined) update.daily_roi = dailyRoi;
+    if (durationDays !== undefined) update.duration_days = durationDays;
+    if (features !== undefined) update.features = features;
+    if (isActive !== undefined) update.is_active = isActive;
+    const { data, error } = await useAdmin()
+      .from('investment_plans')
+      .update(update)
+      .eq('id', id)
+      .select('*')
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async toggleActive(id, isActive) {
+    const { error } = await useAdmin()
+      .from('investment_plans')
+      .update({ is_active: !!isActive })
+      .eq('id', id);
+    if (error) throw error;
+  },
+
+  async delete(id) {
+    const { error } = await useAdmin()
+      .from('investment_plans')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+  },
+};
+
+// ---------------------------------------------------------------------------
+// User Investments
+// ---------------------------------------------------------------------------
+const UserInvestments = {
+  async listByUser(userId) {
+    const { data, error } = await useAdmin()
+      .from('user_investments')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  },
+
+  async findById(id) {
+    const { data, error } = await useAdmin()
+      .from('user_investments')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+    if (error) throw error;
+    return data;
+  },
+
+  async create({ userId, planId, assetLabel, amount, durationDays, expectedReturn }) {
+    const { data, error } = await useAdmin()
+      .from('user_investments')
+      .insert({
+        user_id: userId,
+        plan_id: planId || null,
+        asset_label: assetLabel,
+        amount,
+        duration_days: durationDays,
+        expected_return: expectedReturn,
+      })
+      .select('*')
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async update(id, fields) {
+    const { data, error } = await useAdmin()
+      .from('user_investments')
+      .update(fields)
+      .eq('id', id)
+      .select('*')
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async setStatus(id, status) {
+    return UserInvestments.update(id, { status });
+  },
+
+  async cancel(id) {
+    return UserInvestments.setStatus(id, 'cancelled');
+  },
+
+  async listAll({ limit = 100, status, search } = {}) {
+    let query = useAdmin()
+      .from('user_investments')
+      .select('*, users:user_id(id, full_name, email)')
+      .order('created_at', { ascending: false })
+      .limit(limit);
+    if (status) query = query.eq('status', status);
+    if (search) {
+      query = query.or(`users.full_name.ilike.%${search}%,users.email.ilike.%${search}%`);
+    }
+    const { data, error } = await query;
+    if (error) throw error;
+    return data || [];
+  },
+
+  async listByUserWithPlan(userId) {
+    const { data, error } = await useAdmin()
+      .from('user_investments')
+      .select('*, plan:plan_id(*)')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  },
+};
+
+module.exports = { Users, Holdings, Watchlist, Withdrawals, EmailTokens, Admin, SiteSettings, Deposits, InvestmentPlans, UserInvestments };

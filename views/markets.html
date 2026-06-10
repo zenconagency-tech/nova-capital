@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Live Markets · Nova Capital</title>
+  <meta name="theme-color" content="#0A0B0E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1' y1='0' y2='1'%3E%3Cstop offset='0' stop-color='%2300D4FF'/%3E%3Cstop offset='1' stop-color='%23A78BFA'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Ctext x='16' y='22' font-family='Inter,sans-serif' font-size='18' font-weight='800' fill='%230A0B0E' text-anchor='middle'%3EN%3C/text%3E%3C/svg%3E" />
+  <style>
+    .market-hero {
+      background: linear-gradient(135deg, rgba(0,212,255,0.10), rgba(167,139,250,0.06));
+      border: 1px solid rgba(0,212,255,0.22);
+      border-radius: var(--radius-xl);
+      padding: 28px; margin-bottom: 24px;
+      position: relative; overflow: hidden;
+    }
+    .market-hero::before {
+      content: ""; position: absolute; inset: 0;
+      background: radial-gradient(500px 220px at 90% 0%, rgba(0,212,255,0.18), transparent 60%);
+      pointer-events: none;
+    }
+    .market-hero h1 { margin: 0 0 8px; position: relative; font-size: clamp(24px, 3vw, 32px); color: var(--text-0); }
+    .market-hero p { margin: 0; position: relative; color: var(--text-2); font-size: 14.5px; }
+
+    .market-table-wrap { overflow-x: auto; }
+    .market-table { width: 100%; border-collapse: collapse; }
+    .market-table th, .market-table td {
+      text-align: left; padding: 14px 12px;
+      font-size: 14px; border-bottom: 1px solid var(--border);
+    }
+    .market-table th {
+      color: var(--text-3); font-weight: 500; font-size: 11.5px;
+      letter-spacing: 0.06em; text-transform: uppercase;
+    }
+    .market-table td { color: var(--text-1); font-variant-numeric: tabular-nums; }
+    .market-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .market-table .asset-cell { display: flex; align-items: center; gap: 10px; }
+    .market-table .asset-cell .ic {
+      width: 34px; height: 34px; border-radius: 10px;
+      display: grid; place-items: center;
+      background: var(--bg-3); color: var(--text-0); font-weight: 700; font-size: 12px;
+      border: 1px solid var(--border);
+    }
+    .market-table .num { text-align: right; }
+    .market-table .up { color: var(--profit); }
+    .market-table .down { color: var(--loss); }
+    .market-table .ticker-sm { color: var(--text-3); font-size: 12px; }
+
+    .invest-modal { max-width: 480px; }
+    .invest-modal .field-hint { display: block; margin-top: 4px; }
+  </style>
+</head>
+<body class="has-ticker">
+
+  <!-- NAVBAR -->
+  <header class="navbar" id="navbar">
+    <div class="container nav-inner">
+      <a href="/" class="logo">
+        <span class="logo-mark"></span>
+        <span>Nova<span style="color:var(--accent)">.</span></span>
+      </a>
+      <nav>
+        <ul class="nav-links" id="navLinks">
+          <li><a href="/">Home</a></li>
+          <li><a href="/markets" style="color:var(--accent);">Markets</a></li>
+          <li><a href="/dashboard">Dashboard</a></li>
+        </ul>
+      </nav>
+      <div class="nav-actions" id="navActions">
+        <span class="text-dim" id="navUser" style="margin-right:8px;"></span>
+        <button id="logoutBtn" class="btn btn-secondary btn-sm">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- TICKER -->
+  <div class="ticker">
+    <div class="ticker-track" id="tickerTrack"></div>
+  </div>
+
+  <main class="dash-shell">
+    <div class="container">
+      <div class="market-hero">
+        <h1>Live Markets</h1>
+        <p>Browse assets and invest in your financial future.</p>
+      </div>
+
+      <div class="card dash-card">
+        <div class="market-table-wrap">
+          <table class="market-table" id="marketTable">
+            <thead>
+              <tr>
+                <th>Asset</th>
+                <th class="num">Price (USD)</th>
+                <th class="num">24h Change</th>
+                <th class="num"></th>
+              </tr>
+            </thead>
+            <tbody id="marketBody">
+              <tr><td colspan="4" class="text-dim center" style="padding:24px;">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <div>© 2026 Nova Capital. All rights reserved.</div>
+        <div class="legal">
+          <a href="#">Risk disclosure</a>
+          <a href="#">Terms</a>
+          <a href="#">Privacy</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/format.js"></script>
+  <script src="/js/toast.js"></script>
+  <script>
+    if (!NovaAPI.getToken()) location.replace('/login');
+
+    document.addEventListener('DOMContentLoaded', () => {
+
+    /* Ticker */
+    (function () {
+      const track = document.getElementById('tickerTrack');
+      if (!track) return;
+      const render = (tickers) => {
+        const html = tickers.map((t) => {
+          const cls = t.change >= 0 ? 'up' : 'down';
+          const arrow = t.change >= 0 ? '▲' : '▼';
+          return `<span class="ticker-item">
+            <span class="sym">${t.symbol}</span>
+            <span class="px">${NovaFormat.price(t.price)}</span>
+            <span class="chg ${cls}">${arrow} ${NovaFormat.pct(t.changePct)}</span>
+          </span>`;
+        }).join('');
+        track.innerHTML = html + html;
+      };
+      const update = async () => {
+        try { render((await NovaAPI.tickers()).data.tickers); } catch (_) {}
+      };
+      update(); setInterval(update, 8000);
+    })();
+
+    /* Logout */
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      try { await NovaAPI.logout(); } catch (_) {}
+      NovaAPI.setToken(null);
+      location.replace('/login');
+    });
+
+    /* Auth shell */
+    (async () => {
+      try {
+        const { data: { user } } = await NovaAPI.me();
+        document.getElementById('navUser').textContent = user.email;
+      } catch (e) {
+        if (e.status === 401) { NovaAPI.setToken(null); location.replace('/login'); }
+      }
+    })();
+
+    /* Hardcoded market assets */
+    const ASSETS = [
+      { name: 'Bitcoin', ticker: 'BTC', price: 67342.50, change: 2.14 },
+      { name: 'Ethereum', ticker: 'ETH', price: 3521.80, change: 1.87 },
+      { name: 'BNB', ticker: 'BNB', price: 598.40, change: -0.63 },
+      { name: 'Solana', ticker: 'SOL', price: 172.90, change: 4.22 },
+      { name: 'Apple Inc.', ticker: 'AAPL', price: 213.45, change: 0.91 },
+      { name: 'Tesla', ticker: 'TSLA', price: 178.62, change: -1.45 },
+      { name: 'Gold', ticker: 'XAU', price: 2334.10, change: 0.38 },
+      { name: 'S&P 500', ticker: 'SPX', price: 5287.00, change: 0.55 },
+    ];
+
+    const renderMarket = () => {
+      const body = document.getElementById('marketBody');
+      body.innerHTML = ASSETS.map((a) => {
+        const cls = a.change >= 0 ? 'up' : 'down';
+        const sign = a.change >= 0 ? '+' : '';
+        return `<tr>
+          <td><div class="asset-cell">
+            <div class="ic">${NovaFormat.symbolIcon(a.ticker)}</div>
+            <div>
+              <div style="color:var(--text-0); font-weight:600;">${escapeHtml(a.name)}</div>
+              <div class="ticker-sm">${a.ticker}</div>
+            </div>
+          </div></td>
+          <td class="num" style="color:var(--text-0); font-weight:600; font-family:var(--font-mono);">$${a.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+          <td class="num ${cls}" style="font-weight:600;"><span class="status-pill" style="background:${a.change >= 0 ? 'var(--profit-soft)' : 'var(--loss-soft)'}; color:${a.change >= 0 ? 'var(--profit)' : 'var(--loss)'};">${sign}${a.change.toFixed(2)}%</span></td>
+          <td class="num"><button class="btn btn-primary btn-sm invest-btn" data-asset="${escapeHtml(a.name)}">Invest</button></td>
+        </tr>`;
+      }).join('');
+      body.querySelectorAll('.invest-btn').forEach((btn, i) => {
+        btn.addEventListener('click', () => openInvestModal(ASSETS[i].name));
+      });
+    };
+
+    /* ============================================================
+       Investment Modal (same pattern as dashboard)
+       ============================================================ */
+    let cachedRoiRates = null;
+
+    const getRoiRate = async (days) => {
+      if (!cachedRoiRates) {
+        try {
+          const { data: { rates } } = await NovaAPI.investmentRoiRates();
+          cachedRoiRates = rates;
+        } catch (_) {
+          cachedRoiRates = { 30: 5, 60: 12, 90: 22, 180: 40, 365: 60 };
+        }
+      }
+      return Number(cachedRoiRates[String(days)]) || 5;
+    };
+
+    let investModal = null;
+    let investModalBackdrop = null;
+
+    const openInvestModal = (assetLabel) => {
+      if (!investModal) {
+        investModalBackdrop = document.createElement('div');
+        investModalBackdrop.className = 'modal-backdrop';
+        investModalBackdrop.addEventListener('click', (e) => { if (e.target === investModalBackdrop) closeInvestModal(); });
+        investModal = document.createElement('div');
+        investModal.className = 'modal invest-modal';
+        investModalBackdrop.appendChild(investModal);
+        document.body.appendChild(investModalBackdrop);
+      }
+      investModal.innerHTML = `
+        <h3>Confirm Investment</h3>
+        <form id="investFormInner" novalidate>
+          <div class="form-group">
+            <label>Asset</label>
+            <input class="input" id="invAssetLabel" value="${escapeHtml(assetLabel)}" readonly style="color:var(--accent); font-weight:600;" />
+          </div>
+          <div class="form-group">
+            <label for="invAmount">Amount (USD)</label>
+            <input id="invAmount" type="number" min="10" step="0.01" class="input" placeholder="10.00" required />
+            <span class="field-hint" style="font-size:11.5px; color:var(--text-3);">Minimum: $10</span>
+          </div>
+          <div class="form-group">
+            <label for="invDuration">Duration</label>
+            <select id="invDuration" class="select">
+              <option value="30">1 Month</option>
+              <option value="60">3 Months</option>
+              <option value="90">6 Months</option>
+              <option value="180">12 Months</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Expected Return</label>
+            <div id="invExpectedReturn" class="input" style="color:var(--profit); font-weight:700; font-family:var(--font-mono); cursor:default; background:var(--bg-1);">+ $0.00</div>
+          </div>
+          <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:18px;">
+            <button type="button" class="btn btn-ghost" id="investCancelBtn">Cancel</button>
+            <button type="submit" class="btn btn-primary">Confirm Investment</button>
+          </div>
+        </form>
+      `;
+      investModalBackdrop.classList.add('open');
+
+      const amountInput = investModal.querySelector('#invAmount');
+      const durationSelect = investModal.querySelector('#invDuration');
+      const returnDisplay = investModal.querySelector('#invExpectedReturn');
+
+      const calcReturn = async () => {
+        const amt = Number(amountInput.value) || 0;
+        const rate = await getRoiRate(Number(durationSelect.value));
+        const ret = amt * (rate / 100);
+        returnDisplay.textContent = (ret > 0 ? '+ ' : '') + '$' + ret.toFixed(2);
+      };
+      amountInput.addEventListener('input', calcReturn);
+      durationSelect.addEventListener('change', calcReturn);
+      calcReturn();
+
+      investModal.querySelector('#investCancelBtn').addEventListener('click', closeInvestModal);
+      investModal.querySelector('#investFormInner').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const amount = Number(amountInput.value);
+        const durationDays = Number(durationSelect.value);
+        if (!amount || amount <= 0) return NovaToast.warning('Enter a valid amount.');
+        if (amount < 10) return NovaToast.warning('Amount must be at least $10.');
+        const btn = investModal.querySelector('button[type="submit"]');
+        btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+        try {
+          await NovaAPI.createInvestment({ assetLabel, amount, durationDays });
+          NovaToast.success('Investment confirmed!');
+          closeInvestModal();
+        } catch (err) {
+          NovaToast.error(err.message || 'Failed to create investment');
+        } finally {
+          btn.disabled = false; btn.textContent = 'Confirm Investment';
+        }
+      });
+    };
+
+    const closeInvestModal = () => {
+      if (investModalBackdrop) investModalBackdrop.classList.remove('open');
+      if (investModal) investModal.innerHTML = '';
+    };
+
+    function escapeHtml(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    renderMarket();
+    }); /* DOMContentLoaded */
+  </script>
+</body>
+</html>

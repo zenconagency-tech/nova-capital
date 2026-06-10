@@ -1,7 +1,7 @@
 # Nova Capital — Deploy Progress
 
 **Last updated:** $(date -u +'%Y-%m-%d %H:%M UTC')
-**Status:** ⏸️ Paused — ready to finish Render deploy
+**Status:** ✅ Investment feature complete — ready to deploy
 
 ---
 
@@ -122,3 +122,38 @@ Skip SMTP for now — new users will be auto-verified. Add later from Environmen
 - Persists in `admin.password_hash` in Supabase
 - Survives redeploys
 - The `ADMIN_PASSWORD` env var is read only on first boot
+
+---
+
+## 🔧 Investment Feature — Complete (June 2026)
+
+### Changes made
+
+| Layer | Change |
+|-------|--------|
+| **Schema** | Added `last_roi_at` + `roi_earned_so_far` columns to `user_investments` |
+| **Model** | Added `findById`, `update`, `setStatus`, `cancel`, `listAll`, `listByUserWithPlan` to `UserInvestments` |
+| **Controller** | `create` now validates planId (exists/active/min/max), deducts balance; added `cancel` method (refunds balance) |
+| **Routes** | Added `POST /api/investments/:id/cancel` |
+| **Admin** | Added `GET /api/admin/investments`, `GET /api/admin/users/:id/investments` |
+| **Processor** | New `src/services/investmentProcessor.js` — runs every 60s, credits daily ROI, auto-completes after duration |
+| **Frontend (user)** | "Investments" tab in dashboard — shows all investments with ROI earned, cancel button; invest modal now passes `planId` |
+| **Frontend (admin)** | "User Investments" sidebar section — list all investments by status; user detail modal shows investment history + ROI earned |
+| **API client** | Added `cancelInvestment`, `adminListInvestments`, `adminGetUserInvestments` |
+
+### What each feature does now
+
+1. **Investing** — user picks a plan, enters amount + duration, balance is deducted, plan min/max is enforced
+2. **View investments** — user sees all their investments in the Investments tab with ROI earned so far
+3. **Cancel** — user can cancel active investments; amount is refunded to balance
+4. **Daily ROI** — background processor credits daily ROI to user balance every 24h per investment
+5. **Auto-completion** — investments auto-complete after `duration_days` elapses
+6. **Admin oversight** — full list with filters, per-user investment history in view modal
+
+### Migration note (existing Supabase DB)
+Run this in Supabase SQL Editor to add the new columns:
+```sql
+alter table public.user_investments
+  add column if not exists last_roi_at timestamptz,
+  add column if not exists roi_earned_so_far numeric(18, 2) not null default 0.00;
+```

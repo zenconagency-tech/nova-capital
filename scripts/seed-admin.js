@@ -46,6 +46,14 @@ const DEFAULT_SETTINGS = {
       cta: 'Contact sales',
     },
   ],
+  deposit_wallets: {
+    bitcoin: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+    ethereum: '0x742d35Cc6634C0532925a3b844Bc9e7595f2bD18',
+    usdt: '0x742d35Cc6634C0532925a3b844Bc9e7595f2bD18',
+    paypal: 'admin@novacapital.io',
+    payoneer: 'admin@novacapital.io',
+  },
+  investment_roi: { 30: 5, 60: 12, 90: 22, 180: 40, 365: 60 },
 };
 
 const seedAdmin = async () => {

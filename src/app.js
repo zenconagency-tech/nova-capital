@@ -25,6 +25,8 @@ const portfolioRoutes = require('./routes/portfolio');
 const watchlistRoutes = require('./routes/watchlist');
 const marketRoutes = require('./routes/market');
 const withdrawalRoutes = require('./routes/withdrawals');
+const depositRoutes = require('./routes/deposits');
+const investmentRoutes = require('./routes/investments');
 const adminRoutes = require('./routes/admin');
 const publicRoutes = require('./routes/public');
 
@@ -109,6 +111,8 @@ app.use('/api/portfolio', portfolioRoutes);
 app.use('/api/watchlist', watchlistRoutes);
 app.use('/api/market', marketRoutes);
 app.use('/api/withdrawals', withdrawalRoutes);
+app.use('/api/deposits', depositRoutes);
+app.use('/api/investments', investmentRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/public', publicRoutes);
 
@@ -140,6 +144,8 @@ const viewMap = {
   '/forgot-password':    'forgot-password.html',
   '/reset-password':     'reset-password.html',
   '/dashboard':          'dashboard.html',
+  '/markets':            'markets.html',
+  '/live-markets':       'markets.html',
   '/maintenance':        'maintenance.html',
   '/admin/login':        'admin/login.html',
   '/admin/dashboard':    'admin/dashboard.html',

@@ -75,6 +75,17 @@
     createWithdrawal: (p) => request('POST', '/api/withdrawals', p),
     cancelWithdrawal: (id) => request('POST', `/api/withdrawals/${id}/cancel`),
 
+    // ----- deposits -----
+    deposits: () => request('GET', '/api/deposits'),
+    createDeposit: (p) => request('POST', '/api/deposits', p),
+
+    // ----- investments -----
+    investmentPlans: () => request('GET', '/api/investments/plans'),
+    investmentRoiRates: () => request('GET', '/api/investments/roi-rates'),
+    myInvestments: () => request('GET', '/api/investments'),
+    createInvestment: (p) => request('POST', '/api/investments', p),
+    cancelInvestment: (id) => request('POST', `/api/investments/${id}/cancel`),
+
     // ----- market -----
     tickers: (assetClass) => request('GET', `/api/market/tickers${assetClass ? '?assetClass=' + assetClass : ''}`),
     ticker:  (symbol)     => request('GET', `/api/market/ticker/${encodeURIComponent(symbol)}`),
@@ -108,6 +119,25 @@
       return request('GET', `/api/admin/withdrawals?${qs}`, undefined, { admin: true });
     },
     adminUpdateWithdrawal: (id, p) => request('PATCH', `/api/admin/withdrawals/${id}`, p, { admin: true }),
+    adminListDeposits: ({ status = null, search = '', limit = 100 } = {}) => {
+      const qs = new URLSearchParams({ limit });
+      if (status) qs.set('status', status);
+      if (search) qs.set('search', search);
+      return request('GET', `/api/admin/deposits?${qs}`, undefined, { admin: true });
+    },
+    adminUpdateDeposit: (id, p) => request('PATCH', `/api/admin/deposits/${id}`, p, { admin: true }),
+    adminListInvestments: ({ status = null, search = '', limit = 100 } = {}) => {
+      const qs = new URLSearchParams({ limit });
+      if (status) qs.set('status', status);
+      if (search) qs.set('search', search);
+      return request('GET', `/api/admin/investments?${qs}`, undefined, { admin: true });
+    },
+    adminGetUserInvestments: (id) => request('GET', `/api/admin/users/${id}/investments`, undefined, { admin: true }),
+    adminListInvestmentPlans: () => request('GET', '/api/admin/investment-plans', undefined, { admin: true }),
+    adminCreateInvestmentPlan: (p) => request('POST', '/api/admin/investment-plans', p, { admin: true }),
+    adminUpdateInvestmentPlan: (id, p) => request('PATCH', `/api/admin/investment-plans/${id}`, p, { admin: true }),
+    adminToggleInvestmentPlan: (id) => request('PATCH', `/api/admin/investment-plans/${id}/toggle`, undefined, { admin: true }),
+    adminDeleteInvestmentPlan: (id) => request('DELETE', `/api/admin/investment-plans/${id}`, undefined, { admin: true }),
     adminGetSiteSettings: () => request('GET', '/api/admin/site-settings', undefined, { admin: true }),
     adminUpdateSiteSettings: (p) => request('PATCH', '/api/admin/site-settings', p, { admin: true }),
     adminToggleMaintenance: (enabled) => request('POST', '/api/admin/site-settings/maintenance', { enabled }, { admin: true }),

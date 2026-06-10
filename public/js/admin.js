@@ -9,11 +9,16 @@
   const state = {
     users: [],
     withdrawals: [],
+    deposits: [],
+    investments: [],
+    plans: [],
     userSearch: '',
     userTier: '',
     userRestricted: '',
     wdStatus: '',
     wdSearch: '',
+    invStatus: '',
+    invSearch: '',
     settings: null,
   };
 
@@ -53,6 +58,9 @@
       sidebar.classList.remove('open');
       if (btn.dataset.section === 'users') loadUsers();
       if (btn.dataset.section === 'withdrawals') loadWithdrawals();
+      if (btn.dataset.section === 'deposits') loadDeposits();
+      if (btn.dataset.section === 'plans') loadPlans();
+      if (btn.dataset.section === 'user-investments') loadUserInvestments();
       if (btn.dataset.section === 'settings') loadSettings();
     });
   });
@@ -90,9 +98,17 @@
       $('#sOnHold').textContent = fmtCount(stats.withdrawals.on_hold);
       $('#sRestored').textContent = fmtCount(stats.withdrawals.restored);
 
+      // Deposit stats
+      if (stats.deposits) {
+        $('#sDepPending').textContent = fmtCount(stats.deposits.pending);
+        $('#sDepApproved').textContent = fmtCount(stats.deposits.approved);
+        $('#sDepRejected').textContent = fmtCount(stats.deposits.rejected);
+      }
+
       // Sidebar counts
       $('#navUsersCount').textContent = fmtCount(stats.usersCount);
       $('#navWdCount').textContent = fmtCount(stats.withdrawals.pending);
+      $('#navDepCount').textContent = stats.deposits ? fmtCount(stats.deposits.pending) : '—';
     } catch (e) {
       if (e.status === 401) { NovaAPI.setAdminToken(null); location.replace('/admin/login.html'); }
     }
@@ -275,6 +291,21 @@
       `).join('');
       // Pricing
       renderPricingEditor(settings.pricing_plans || []);
+
+      // Deposit wallets
+      const wallets = settings.deposit_wallets || {};
+      $('#walletBitcoin').value = wallets.bitcoin || '';
+      $('#walletEthereum').value = wallets.ethereum || '';
+      $('#walletPaypal').value = wallets.paypal_email || '';
+      $('#walletPayoneer').value = wallets.payoneer_email || '';
+
+      // ROI rates
+      const roi = settings.investment_roi || {};
+      $('#roi30').value = roi['30'] || '';
+      $('#roi60').value = roi['60'] || '';
+      $('#roi90').value = roi['90'] || '';
+      $('#roi180').value = roi['180'] || '';
+      $('#roi365').value = roi['365'] || '';
     } catch (e) {
       if (e.status === 401) { NovaAPI.setAdminToken(null); location.replace('/admin/login.html'); }
       NovaToast.error(e.message);
@@ -318,9 +349,22 @@
     const hero_subtext = $('#heroSubtext').value;
     const market_categories = $$('#catsList input[type="checkbox"]').filter((c) => c.checked).map((c) => c.dataset.cat);
     const pricing_plans = collectPricingFromForm();
+    const deposit_wallets = {
+      bitcoin: $('#walletBitcoin').value.trim(),
+      ethereum: $('#walletEthereum').value.trim(),
+      paypal_email: $('#walletPaypal').value.trim(),
+      payoneer_email: $('#walletPayoneer').value.trim(),
+    };
+    const investment_roi = {
+      '30': Number($('#roi30').value) || 5,
+      '60': Number($('#roi60').value) || 12,
+      '90': Number($('#roi90').value) || 22,
+      '180': Number($('#roi180').value) || 40,
+      '365': Number($('#roi365').value) || 60,
+    };
 
     try {
-      await NovaAPI.adminUpdateSiteSettings({ maintenance_mode: maintenance, hero_headline, hero_subtext, market_categories, pricing_plans });
+      await NovaAPI.adminUpdateSiteSettings({ maintenance_mode: maintenance, hero_headline, hero_subtext, market_categories, pricing_plans, deposit_wallets, investment_roi });
       NovaToast.success('Site settings saved.');
       state.settings = null;
       loadSettings();
@@ -444,19 +488,39 @@
     $('#viewCreated').textContent = new Date(user.created_at).toLocaleString();
     $('#viewLastLogin').textContent = user.last_login_at ? new Date(user.last_login_at).toLocaleString() : '—';
     $('#viewUserWdBody').innerHTML = `<tr><td colspan="4" class="text-dim center" style="padding:16px;">Loading…</td></tr>`;
+    $('#viewUserInvBody').innerHTML = `<tr><td colspan="5" class="text-dim center" style="padding:16px;">Loading…</td></tr>`;
     viewModal.classList.add('open');
     try {
       const { data: { withdrawals } } = await NovaAPI.adminGetUserWithdrawals(user.id);
       if (!withdrawals.length) {
         $('#viewUserWdBody').innerHTML = `<tr><td colspan="4" class="text-dim center" style="padding:16px;">No withdrawals.</td></tr>`;
-        return;
+      } else {
+        $('#viewUserWdBody').innerHTML = withdrawals.map((w) => `<tr>
+          <td class="text-dim">${new Date(w.requested_at).toLocaleDateString()}</td>
+          <td class="num mono" style="color:var(--text-0); font-weight:600;">${fmtPrice(w.amount)}</td>
+          <td>${statusPill(w.status)}</td>
+          <td class="text-dim" style="font-size:12px;">${escapeHtml(w.notes || '—')}</td>
+        </tr>`).join('');
       }
-      $('#viewUserWdBody').innerHTML = withdrawals.map((w) => `<tr>
-        <td class="text-dim">${new Date(w.requested_at).toLocaleDateString()}</td>
-        <td class="num mono" style="color:var(--text-0); font-weight:600;">${fmtPrice(w.amount)}</td>
-        <td>${statusPill(w.status)}</td>
-        <td class="text-dim" style="font-size:12px;">${escapeHtml(w.notes || '—')}</td>
-      </tr>`).join('');
+    } catch (e) { NovaToast.error(e.message); }
+    try {
+      const { data: { investments } } = await NovaAPI.adminGetUserInvestments(user.id);
+      if (!investments.length) {
+        $('#viewUserInvBody').innerHTML = `<tr><td colspan="5" class="text-dim center" style="padding:16px;">No investments.</td></tr>`;
+      } else {
+        const statusPillInv = (s) => {
+          const labels = { active: 'Active', completed: 'Completed', cancelled: 'Cancelled' };
+          return `<span class="status-pill status-${s === 'active' ? 'approved' : s === 'completed' ? 'pending' : 'rejected'}"><span class="dot"></span>${labels[s] || s}</span>`;
+        };
+        $('#viewUserInvBody').innerHTML = investments.map((inv) => `<tr>
+          <td class="text-dim">${new Date(inv.created_at).toLocaleDateString()}</td>
+          <td style="color:var(--text-0);">${escapeHtml(inv.asset_label)}</td>
+          <td class="num mono" style="color:var(--text-0); font-weight:600;">${fmtPrice(inv.amount)}</td>
+          <td class="num mono" style="color:var(--profit);">+ ${fmtPrice(inv.roi_earned_so_far || 0)}</td>
+          <td class="num mono" style="color:var(--profit);">+ ${fmtPrice(inv.expected_return)}</td>
+          <td>${statusPillInv(inv.status)}</td>
+        </tr>`).join('');
+      }
     } catch (e) { NovaToast.error(e.message); }
   };
   $('#viewClose')?.addEventListener('click', () => viewModal.classList.remove('open'));
@@ -483,6 +547,226 @@
   /* ============================================================
      BOOT
      ============================================================ */
+  /* ============================================================
+     DEPOSITS (admin)
+     ============================================================ */
+  const loadDeposits = async () => {
+    const list = $('#depList');
+    list.innerHTML = `<div class="row body"><div style="grid-column: 1 / -1;" class="text-dim center" style="padding:24px;">Loading…</div></div>`;
+    try {
+      const { data: { deposits } } = await NovaAPI.adminListDeposits({
+        status: state.wdStatus || null, search: state.wdSearch, limit: 200,
+      });
+      state.deposits = deposits;
+      $('#depTotal').textContent = `${fmtCount(deposits.length)} deposit(s)`;
+
+      if (!deposits.length) {
+        list.innerHTML = `<div class="row body"><div style="grid-column: 1 / -1;" class="text-dim center" style="padding:24px;">No deposits.</div></div>`;
+        return;
+      }
+
+      const methodLabels = { bitcoin: 'Bitcoin', ethereum: 'Ethereum', usdt: 'USDT', paypal: 'PayPal', payoneer: 'Payoneer', gift_card: 'Gift Card' };
+      list.innerHTML = deposits.map((d) => {
+        const user = d.users || {};
+        return `<div class="row dep body" data-did="${d.id}">
+          <div class="text-dim">${new Date(d.requested_at).toLocaleString()}</div>
+          <div>
+            <div style="color:var(--text-0); font-weight:600;">${escapeHtml(user.full_name || '(no name)')}</div>
+            <div class="email">${escapeHtml(user.email || '—')}</div>
+          </div>
+          <div class="num mono" style="color:var(--text-0); font-weight:600;">${fmtPrice(d.amount)}</div>
+          <div style="text-transform:capitalize; color:var(--text-2);">${methodLabels[d.method] || d.method.replace('_', ' ')}</div>
+          <div>${statusPill(d.status)}</div>
+          <div class="row-actions">
+            ${d.status === 'pending' ? `<button class="btn btn-secondary" data-act="approve">Approve</button><button class="btn btn-ghost" data-act="reject">Reject</button>` : ''}
+          </div>
+        </div>`;
+      }).join('');
+
+      list.querySelectorAll('.row.dep').forEach((row) => {
+        const did = row.dataset.did;
+        row.querySelectorAll('[data-act]').forEach((btn) => {
+          btn.addEventListener('click', () => doDepositAction(did, btn.dataset.act));
+        });
+      });
+    } catch (e) {
+      if (e.status === 401) { NovaAPI.setAdminToken(null); location.replace('/admin/login.html'); return; }
+      NovaToast.error(e.message);
+    }
+  };
+
+  const doDepositAction = async (id, action) => {
+    if (!confirm(`${action === 'approve' ? 'Approve' : 'Reject'} this deposit? This will ${action === 'approve' ? 'credit the user\'s balance' : 'reject the request'} immediately.`)) return;
+    try {
+      const { message } = await NovaAPI.adminUpdateDeposit(id, { action });
+      NovaToast.success(message || 'Updated.');
+      loadDeposits();
+      renderOverview();
+    } catch (e) { NovaToast.error(e.message); }
+  };
+
+  $('#depFilterBtn')?.addEventListener('click', () => { state.wdStatus = $('#depFilter').value; loadDeposits(); });
+  $('#depSearch')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { state.wdSearch = e.target.value.trim(); loadDeposits(); } });
+
+  /* ============================================================
+     USER INVESTMENTS (admin)
+     ============================================================ */
+  const loadUserInvestments = async () => {
+    const list = $('#invList');
+    list.innerHTML = `<div class="row body"><div style="grid-column: 1 / -1;" class="text-dim center" style="padding:24px;">Loading…</div></div>`;
+    try {
+      const { data: { investments } } = await NovaAPI.adminListInvestments({
+        status: state.invStatus || null, search: state.invSearch, limit: 200,
+      });
+      state.investments = investments;
+      $('#invTotal').textContent = `${fmtCount(investments.length)} investment(s)`;
+
+      if (!investments.length) {
+        list.innerHTML = `<div class="row body"><div style="grid-column: 1 / -1;" class="text-dim center" style="padding:24px;">No user investments.</div></div>`;
+        return;
+      }
+
+      const statusPillInv = (s) => {
+        const labels = { active: 'Active', completed: 'Completed', cancelled: 'Cancelled' };
+        return `<span class="status-pill status-${s === 'active' ? 'approved' : s === 'completed' ? 'pending' : 'rejected'}"><span class="dot"></span>${labels[s] || s}</span>`;
+      };
+
+      list.innerHTML = investments.map((inv) => {
+        const user = inv.users || {};
+        return `<div class="row inv body">
+          <div class="text-dim">${new Date(inv.created_at).toLocaleDateString()}</div>
+          <div>
+            <div style="color:var(--text-0); font-weight:600;">${escapeHtml(user.full_name || '(no name)')}</div>
+            <div class="email">${escapeHtml(user.email || '—')}</div>
+          </div>
+          <div class="num mono" style="color:var(--text-0); font-weight:600;">${fmtPrice(inv.amount)}</div>
+          <div class="num mono" style="color:var(--profit);">+ ${fmtPrice(inv.roi_earned_so_far || 0)}</div>
+          <div class="num mono" style="color:var(--profit);">+ ${fmtPrice(inv.expected_return)}</div>
+          <div style="color:var(--text-2);">${escapeHtml(inv.asset_label)}</div>
+          <div class="text-dim">${inv.duration_days}d</div>
+          <div>${statusPillInv(inv.status)}</div>
+        </div>`;
+      }).join('');
+    } catch (e) {
+      if (e.status === 401) { NovaAPI.setAdminToken(null); location.replace('/admin/login.html'); return; }
+      NovaToast.error(e.message);
+    }
+  };
+
+  $('#invFilterBtn')?.addEventListener('click', () => { state.invStatus = $('#invFilter').value; loadUserInvestments(); });
+  $('#invSearch')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { state.invSearch = e.target.value.trim(); loadUserInvestments(); } });
+
+  /* ============================================================
+     INVESTMENT PLANS (admin)
+     ============================================================ */
+  const loadPlans = async () => {
+    const list = $('#planList');
+    list.innerHTML = `<div class="row body"><div style="grid-column: 1 / -1;" class="text-dim center" style="padding:24px;">Loading…</div></div>`;
+    try {
+      const { data: { plans } } = await NovaAPI.adminListInvestmentPlans();
+      state.plans = plans;
+
+      if (!plans.length) {
+        list.innerHTML = `<div class="row body"><div style="grid-column: 1 / -1;" class="text-dim center" style="padding:24px;">No investment plans. Create one.</div></div>`;
+        return;
+      }
+
+      list.innerHTML = plans.map((p) => `<div class="row plan body" data-pid="${p.id}">
+        <div style="color:var(--text-0); font-weight:600;">${escapeHtml(p.name)}</div>
+        <div class="num mono">$${Number(p.min_amount).toLocaleString()}</div>
+        <div class="num mono">${p.max_amount ? '$' + Number(p.max_amount).toLocaleString() : '<span class="text-dim">∞</span>'}</div>
+        <div class="num mono" style="color:var(--profit);">${p.daily_roi}%</div>
+        <div class="num mono">${p.duration_days}d</div>
+        <div>${p.is_active ? '<span class="status-pill status-approved"><span class="dot"></span>Active</span>' : '<span class="status-pill status-rejected"><span class="dot"></span>Inactive</span>'}</div>
+        <div class="row-actions">
+          <button class="btn btn-ghost" data-act="edit">Edit</button>
+          <button class="btn btn-ghost" data-act="toggle">${p.is_active ? 'Deactivate' : 'Activate'}</button>
+          <button class="btn btn-ghost danger" data-act="delete">Delete</button>
+        </div>
+      </div>`).join('');
+
+      list.querySelectorAll('.row.plan').forEach((row) => {
+        const pid = row.dataset.pid;
+        const plan = state.plans.find((p) => p.id === pid);
+        if (!plan) return;
+        row.querySelectorAll('[data-act]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const act = btn.dataset.act;
+            if (act === 'edit') return openPlanModal(plan);
+            if (act === 'toggle') return doTogglePlan(plan);
+            if (act === 'delete') return doDeletePlan(plan);
+          });
+        });
+      });
+    } catch (e) {
+      if (e.status === 401) { NovaAPI.setAdminToken(null); location.replace('/admin/login.html'); return; }
+      NovaToast.error(e.message);
+    }
+  };
+
+  const planModal = $('#planModal');
+  const openPlanModal = (plan) => {
+    const isEdit = !!plan;
+    $('#planModalTitle').textContent = isEdit ? 'Edit Investment Plan' : 'Add Investment Plan';
+    $('#planId').value = isEdit ? plan.id : '';
+    $('#planName').value = isEdit ? plan.name : '';
+    $('#planMin').value = isEdit ? plan.min_amount : '';
+    $('#planMax').value = isEdit && plan.max_amount ? plan.max_amount : '';
+    $('#planRoi').value = isEdit ? plan.daily_roi : '';
+    $('#planDuration').value = isEdit ? plan.duration_days : '';
+    $('#planFeatures').value = isEdit && Array.isArray(plan.features) ? plan.features.join('\n') : '';
+    $('#planActive').checked = isEdit ? plan.is_active : true;
+    planModal.classList.add('open');
+  };
+
+  $('#addPlanBtn')?.addEventListener('click', () => openPlanModal(null));
+  $('#planCancel')?.addEventListener('click', () => planModal.classList.remove('open'));
+
+  $('#planForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = $('#planId').value;
+    const payload = {
+      name: $('#planName').value.trim(),
+      minAmount: Number($('#planMin').value),
+      maxAmount: $('#planMax').value ? Number($('#planMax').value) : null,
+      dailyRoi: Number($('#planRoi').value),
+      durationDays: Number($('#planDuration').value),
+      features: $('#planFeatures').value.split('\n').filter((l) => l.trim()).map((l) => l.trim()),
+      isActive: $('#planActive').checked,
+    };
+    try {
+      if (id) {
+        await NovaAPI.adminUpdateInvestmentPlan(id, payload);
+        NovaToast.success('Plan updated.');
+      } else {
+        await NovaAPI.adminCreateInvestmentPlan(payload);
+        NovaToast.success('Plan created.');
+      }
+      planModal.classList.remove('open');
+      loadPlans();
+    } catch (e) { NovaToast.error(e.message); }
+  });
+
+  const doTogglePlan = async (plan) => {
+    try {
+      const { message } = await NovaAPI.adminToggleInvestmentPlan(plan.id);
+      NovaToast.success(message || 'Toggled.');
+      loadPlans();
+    } catch (e) { NovaToast.error(e.message); }
+  };
+
+  const doDeletePlan = async (plan) => {
+    if (!confirm(`Are you sure you want to delete "${plan.name}"?`)) return;
+    try {
+      const { message } = await NovaAPI.adminDeleteInvestmentPlan(plan.id);
+      NovaToast.success(message || 'Deleted.');
+      loadPlans();
+    } catch (e) { NovaToast.error(e.message); }
+  };
+
+  /* ============================================================
+     BOOT
+     ============================================================ */
   renderOverview();
   loadUsers();
   setInterval(renderOverview, 30000);
@@ -491,5 +775,8 @@
     if (!sec) return;
     if (sec.id === 'sec-users') loadUsers();
     if (sec.id === 'sec-withdrawals') loadWithdrawals();
+    if (sec.id === 'sec-deposits') loadDeposits();
+    if (sec.id === 'sec-plans') loadPlans();
+    if (sec.id === 'sec-user-investments') loadUserInvestments();
   }, 20000);
 })();

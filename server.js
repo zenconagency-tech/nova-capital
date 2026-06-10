@@ -1,6 +1,7 @@
 const app = require('./src/app');
 const config = require('./src/config');
 const market = require('./src/services/market');
+const investmentProcessor = require('./src/services/investmentProcessor');
 const { seedAll } = require('./scripts/seed-admin');
 
 const start = async () => {
@@ -12,11 +13,13 @@ const start = async () => {
       `[nova] ${config.appName} listening on http://localhost:${config.port}  (${config.env})`
     );
     market.start();
+    investmentProcessor.start();
   });
 
   const shutdown = (signal) => {
     console.log(`\n[nova] ${signal} received, shutting down...`);
     market.stop();
+    investmentProcessor.stop();
     server.close(() => process.exit(0));
     setTimeout(() => process.exit(1), 10_000).unref();
   };

@@ -3,7 +3,7 @@
  * withdrawal mgmt, site settings, account settings.
  */
 const config = require('../config');
-const { Admin, Users, Withdrawals, SiteSettings } = require('../models');
+const { Admin, Users, Withdrawals, SiteSettings, Deposits, InvestmentPlans, UserInvestments } = require('../models');
 const { hashPassword, comparePassword, passwordPolicy } = require('../utils/password');
 const { signAdminToken } = require('../utils/tokens');
 const { sendOk, sendCreated, HttpError } = require('../utils/http');
@@ -83,7 +83,7 @@ module.exports = {
 
   /* GET /api/admin/stats */
   async stats(req, res) {
-    const [usersCount, verifiedCount, totalBalance, totalWithdrawals, pending, approved, rejected, onHold, restored] =
+    const [usersCount, verifiedCount, totalBalance, totalWithdrawals, pending, approved, rejected, onHold, restored, depPending, depApproved, depRejected] =
       await Promise.all([
         Users.countAll(),
         Users.countVerified(),
@@ -94,6 +94,9 @@ module.exports = {
         Withdrawals.countByStatus('rejected'),
         Withdrawals.countByStatus('on_hold'),
         Withdrawals.countByStatus('restored'),
+        Deposits.countByStatus('pending'),
+        Deposits.countByStatus('approved'),
+        Deposits.countByStatus('rejected'),
       ]);
     return sendOk(res, {
       stats: {
@@ -101,8 +104,26 @@ module.exports = {
         verifiedCount,
         totalBalance: Math.round(totalBalance * 100) / 100,
         withdrawals: { total: totalWithdrawals, pending, approved, rejected, on_hold: onHold, restored },
+        deposits: { pending: depPending, approved: depApproved, rejected: depRejected },
       },
     });
+  },
+
+  /* GET /api/admin/investments */
+  async listInvestments(req, res) {
+    const limit = Math.min(parseInt(req.query.limit, 10) || 100, 500);
+    const status = req.query.status && ['active','completed','cancelled'].includes(req.query.status) ? req.query.status : null;
+    const search = String(req.query.search || '').trim();
+    const list = await UserInvestments.listAll({ limit, status, search });
+    return sendOk(res, { investments: list });
+  },
+
+  /* GET /api/admin/users/:id/investments */
+  async getUserInvestments(req, res) {
+    const user = await Users.findById(req.params.id);
+    if (!user) throw new HttpError(404, 'User not found');
+    const list = await UserInvestments.listByUser(req.params.id);
+    return sendOk(res, { user, investments: list });
   },
 
   /* ============================================================
@@ -273,7 +294,7 @@ module.exports = {
 
   /* PATCH /api/admin/site-settings */
   async updateSiteSettings(req, res) {
-    const allowed = ['maintenance_mode', 'hero_headline', 'hero_subtext', 'market_categories', 'pricing_plans'];
+    const allowed = ['maintenance_mode', 'hero_headline', 'hero_subtext', 'market_categories', 'pricing_plans', 'deposit_wallets', 'investment_roi'];
     const update = {};
     for (const k of allowed) {
       if (k in req.body) update[k] = req.body[k];
@@ -292,5 +313,97 @@ module.exports = {
     await SiteSettings.set('maintenance_mode', !!enabled);
     invalidateMaintenanceCache();
     return sendOk(res, { maintenance_mode: !!enabled }, enabled ? 'Maintenance enabled.' : 'Maintenance disabled.');
+  },
+
+  /* ============================================================
+   *                       DEPOSITS (admin)
+   * ============================================================ */
+
+  /* GET /api/admin/deposits */
+  async listDeposits(req, res) {
+    const limit = Math.min(parseInt(req.query.limit, 10) || 100, 500);
+    const status = req.query.status && ['pending','approved','rejected'].includes(req.query.status) ? req.query.status : null;
+    const search = String(req.query.search || '').trim();
+    const list = await Deposits.listAll({ limit, status, search });
+    return sendOk(res, { deposits: list });
+  },
+
+  /* PATCH /api/admin/deposits/:id */
+  async updateDeposit(req, res) {
+    const { action } = req.body;
+    if (!['approve','reject'].includes(action)) {
+      throw new HttpError(400, 'Invalid action. Use approve | reject.');
+    }
+    const dep = await Deposits.findById(req.params.id);
+    if (!dep) throw new HttpError(404, 'Deposit not found');
+    if (dep.status !== 'pending') throw new HttpError(400, 'Only pending deposits can be updated');
+
+    let newStatus;
+    if (action === 'approve') {
+      newStatus = 'approved';
+      const { Users } = require('../models');
+      const user = await Users.findById(dep.user_id);
+      if (!user) throw new HttpError(404, 'Owner not found');
+      const newBalance = Math.round((Number(user.balance) + Number(dep.amount)) * 100) / 100;
+      await Users.adminSetBalance(user.id, newBalance);
+    }
+    if (action === 'reject') newStatus = 'rejected';
+
+    const updated = await Deposits.setStatus(dep.id, newStatus, req.body.notes || null);
+    return sendOk(res, { deposit: updated }, `Deposit ${newStatus}.`);
+  },
+
+  /* ============================================================
+   *                  INVESTMENT PLANS (admin)
+   * ============================================================ */
+
+  /* GET /api/admin/investment-plans */
+  async listInvestmentPlans(req, res) {
+    const plans = await InvestmentPlans.listAll();
+    return sendOk(res, { plans });
+  },
+
+  /* POST /api/admin/investment-plans */
+  async createInvestmentPlan(req, res) {
+    const { name, minAmount, maxAmount, dailyRoi, durationDays, features, isActive } = req.body;
+    if (!name || !name.trim()) throw new HttpError(400, 'Plan name is required');
+    if (!Number.isFinite(Number(minAmount)) || Number(minAmount) <= 0) throw new HttpError(400, 'Min amount must be > 0');
+    if (!Number.isFinite(Number(dailyRoi)) || Number(dailyRoi) <= 0) throw new HttpError(400, 'Daily ROI must be > 0');
+    if (!Number.isFinite(Number(durationDays)) || Number(durationDays) <= 0) throw new HttpError(400, 'Duration must be > 0');
+    const plan = await InvestmentPlans.create({
+      name: name.trim(),
+      minAmount: Number(minAmount),
+      maxAmount: maxAmount ? Number(maxAmount) : null,
+      dailyRoi: Number(dailyRoi),
+      durationDays: Number(durationDays),
+      features: Array.isArray(features) ? features : [],
+      isActive: isActive !== false,
+    });
+    return sendCreated(res, { plan }, 'Plan created.');
+  },
+
+  /* PATCH /api/admin/investment-plans/:id */
+  async updateInvestmentPlan(req, res) {
+    const existing = await InvestmentPlans.findById(req.params.id);
+    if (!existing) throw new HttpError(404, 'Plan not found');
+    const plan = await InvestmentPlans.update(req.params.id, req.body);
+    return sendOk(res, { plan }, 'Plan updated.');
+  },
+
+  /* PATCH /api/admin/investment-plans/:id/toggle */
+  async toggleInvestmentPlan(req, res) {
+    const existing = await InvestmentPlans.findById(req.params.id);
+    if (!existing) throw new HttpError(404, 'Plan not found');
+    await InvestmentPlans.toggleActive(req.params.id, !existing.is_active);
+    const fresh = await InvestmentPlans.findById(req.params.id);
+    return sendOk(res, { plan: fresh }, fresh.is_active ? 'Plan activated.' : 'Plan deactivated.');
+  },
+
+  /* DELETE /api/admin/investment-plans/:id */
+  async deleteInvestmentPlan(req, res) {
+    const existing = await InvestmentPlans.findById(req.params.id);
+    if (!existing) throw new HttpError(404, 'Plan not found');
+    await InvestmentPlans.delete(req.params.id);
+    return sendOk(res, { deleted: true }, 'Plan deleted.');
   },
 };

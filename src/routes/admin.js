@@ -170,6 +170,8 @@ router.patch(
     body('hero_subtext').optional().isString().isLength({ max: 2000 }),
     body('market_categories').optional().isArray(),
     body('pricing_plans').optional().isArray(),
+    body('deposit_wallets').optional().isObject(),
+    body('investment_roi').optional().isObject(),
   ],
   validate,
   asyncHandler(adminController.updateSiteSettings)
@@ -181,6 +183,84 @@ router.post(
   [body('enabled').isBoolean()],
   validate,
   asyncHandler(adminController.toggleMaintenance)
+);
+
+/* ============================================================
+ *                       DEPOSITS (admin)
+ * ============================================================ */
+
+router.get('/deposits', adminRequired, asyncHandler(adminController.listDeposits));
+
+router.patch(
+  '/deposits/:id',
+  adminRequired,
+  [
+    param('id').isUUID(),
+    body('action').isIn(['approve', 'reject']),
+    body('notes').optional().isString().isLength({ max: 500 }),
+  ],
+  validate,
+  asyncHandler(adminController.updateDeposit)
+);
+
+/* ============================================================
+ *                  USER INVESTMENTS (admin)
+ * ============================================================ */
+
+router.get('/investments', adminRequired, asyncHandler(adminController.listInvestments));
+
+router.get(
+  '/users/:id/investments',
+  adminRequired,
+  [param('id').isUUID()],
+  validate,
+  asyncHandler(adminController.getUserInvestments)
+);
+
+/* ============================================================
+ *                  INVESTMENT PLANS (admin)
+ * ============================================================ */
+
+router.get('/investment-plans', adminRequired, asyncHandler(adminController.listInvestmentPlans));
+
+router.post(
+  '/investment-plans',
+  adminRequired,
+  [
+    body('name').isString().notEmpty(),
+    body('minAmount').isFloat({ gt: 0 }),
+    body('maxAmount').optional({ values: 'null' }).isFloat({ gt: 0 }),
+    body('dailyRoi').isFloat({ gt: 0 }),
+    body('durationDays').isInt({ gt: 0 }),
+    body('features').optional().isArray(),
+    body('isActive').optional().isBoolean(),
+  ],
+  validate,
+  asyncHandler(adminController.createInvestmentPlan)
+);
+
+router.patch(
+  '/investment-plans/:id',
+  adminRequired,
+  [param('id').isUUID()],
+  validate,
+  asyncHandler(adminController.updateInvestmentPlan)
+);
+
+router.patch(
+  '/investment-plans/:id/toggle',
+  adminRequired,
+  [param('id').isUUID()],
+  validate,
+  asyncHandler(adminController.toggleInvestmentPlan)
+);
+
+router.delete(
+  '/investment-plans/:id',
+  adminRequired,
+  [param('id').isUUID()],
+  validate,
+  asyncHandler(adminController.deleteInvestmentPlan)
 );
 
 module.exports = router;
