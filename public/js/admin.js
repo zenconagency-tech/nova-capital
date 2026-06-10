@@ -568,6 +568,9 @@
       const methodLabels = { bitcoin: 'Bitcoin', ethereum: 'Ethereum', usdt: 'USDT', paypal: 'PayPal', payoneer: 'Payoneer', gift_card: 'Gift Card' };
       list.innerHTML = deposits.map((d) => {
         const user = d.users || {};
+        const meta = d.method_meta || {};
+        const isGiftCard = d.method === 'gift_card';
+        const hasImages = isGiftCard && (meta.frontImage || meta.backImage);
         return `<div class="row dep body" data-did="${d.id}">
           <div class="text-dim">${new Date(d.requested_at).toLocaleString()}</div>
           <div>
@@ -575,13 +578,29 @@
             <div class="email">${escapeHtml(user.email || '—')}</div>
           </div>
           <div class="num mono" style="color:var(--text-0); font-weight:600;">${fmtPrice(d.amount)}</div>
-          <div style="text-transform:capitalize; color:var(--text-2);">${methodLabels[d.method] || d.method.replace('_', ' ')}</div>
+          <div style="text-transform:capitalize; color:var(--text-2);">${methodLabels[d.method] || d.method.replace('_', ' ')}${isGiftCard ? '<br/><span class="text-dim" style="font-size:11px;">' + escapeHtml(meta.brand || '') + '</span>' : ''}</div>
           <div>${statusPill(d.status)}</div>
-          <div class="row-actions">
-            ${d.status === 'pending' ? `<button class="btn btn-secondary" data-act="approve">Approve</button><button class="btn btn-ghost" data-act="reject">Reject</button>` : ''}
+          <div class="row-actions" style="gap:2px;">
+            ${hasImages ? `<button class="btn btn-ghost btn-sm" data-act="view-card" data-front="${escapeHtml(meta.frontImage || '')}" data-back="${escapeHtml(meta.backImage || '')}" data-brand="${escapeHtml(meta.brand || '')}">View Card</button>` : ''}
+            ${d.status === 'pending' ? `<button class="btn btn-secondary btn-sm" data-act="approve">Approve</button><button class="btn btn-ghost btn-sm" data-act="reject">Reject</button>` : ''}
           </div>
         </div>`;
       }).join('');
+
+      list.querySelectorAll('[data-act="view-card"]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const front = btn.dataset.front;
+          const back = btn.dataset.back;
+          const brand = btn.dataset.brand;
+          $('#depImgTitle').textContent = brand ? `${brand} Gift Card` : 'Gift Card Images';
+          let html = '';
+          if (front) html += `<div style="flex:1;min-width:260px;"><h4 style="margin:0 0 8px;color:var(--text-0);font-size:14px;">Front</h4><a href="${front}" download="gift_card_front" target="_blank"><img src="${front}" style="width:100%;border-radius:8px;border:1px solid var(--border);cursor:pointer;" /></a></div>`;
+          if (back) html += `<div style="flex:1;min-width:260px;"><h4 style="margin:0 0 8px;color:var(--text-0);font-size:14px;">Back</h4><a href="${back}" download="gift_card_back" target="_blank"><img src="${back}" style="width:100%;border-radius:8px;border:1px solid var(--border);cursor:pointer;" /></a></div>`;
+          if (!html) html = '<div class="text-dim center" style="padding:24px;">No images uploaded.</div>';
+          $('#depImgContent').innerHTML = html;
+          $('#depositImagesModal').classList.add('open');
+        });
+      });
 
       list.querySelectorAll('.row.dep').forEach((row) => {
         const did = row.dataset.did;
@@ -607,6 +626,8 @@
 
   $('#depFilterBtn')?.addEventListener('click', () => { state.wdStatus = $('#depFilter').value; loadDeposits(); });
   $('#depSearch')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { state.wdSearch = e.target.value.trim(); loadDeposits(); } });
+  $('#depImgClose')?.addEventListener('click', () => $('#depositImagesModal').classList.remove('open'));
+  $('#depositImagesModal')?.addEventListener('click', (e) => { if (e.target === $('#depositImagesModal')) $('#depositImagesModal').classList.remove('open'); });
 
   /* ============================================================
      USER INVESTMENTS (admin)

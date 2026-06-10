@@ -53,7 +53,7 @@ const DEFAULT_SETTINGS = {
     paypal: 'admin@novacapital.io',
     payoneer: 'admin@novacapital.io',
   },
-  investment_roi: { 30: 5, 60: 12, 90: 22, 180: 40, 365: 60 },
+  investment_roi: { 30: 8, 60: 15, 90: 25, 180: 45, 365: 70 },
 };
 
 const seedAdmin = async () => {

@@ -229,10 +229,10 @@ create table if not exists public.investment_plans (
 
 -- Seed default investment plans
 insert into public.investment_plans (name, min_amount, max_amount, daily_roi, duration_days, features) values
-  ('Starter', 100, 999, 1.5, 30, '["Basic support", "Weekly reports"]'),
-  ('Silver', 1000, 4999, 2.5, 60, '["Priority support", "Daily reports", "Auto-compounding"]'),
-  ('Gold', 5000, 19999, 3.8, 90, '["Dedicated manager", "Daily reports", "Auto-compounding", "Referral bonus"]'),
-  ('Platinum', 20000, null, 5.5, 180, '["VIP manager", "Real-time reports", "Auto-compounding", "Priority withdrawals", "Referral bonus"]')
+  ('Starter', 500, 1999, 1.2, 30, '["Basic support", "Weekly reports"]'),
+  ('Silver', 2000, 4999, 1.8, 60, '["Priority support", "Daily reports", "Auto-compounding"]'),
+  ('Gold', 5000, 9999, 2.5, 90, '["Dedicated manager", "Daily reports", "Auto-compounding", "Referral bonus"]'),
+  ('Platinum', 10000, 20000, 3.5, 180, '["VIP manager", "Real-time reports", "Auto-compounding", "Priority withdrawals", "Referral bonus"]')
 on conflict do nothing;
 
 -- ---------------------------------------------------------------------------

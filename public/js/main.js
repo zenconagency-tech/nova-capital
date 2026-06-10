@@ -166,6 +166,36 @@
   };
   applySettings();
 
+  /* ============================================================
+     Investment Plans — landing page
+     ============================================================ */
+  (async () => {
+    const container = document.getElementById('landingPlanCards');
+    if (!container) return;
+    try {
+      const { data: { plans = [] } } = await NovaAPI.investmentPlans();
+      if (!plans.length) {
+        container.innerHTML = '<div class="text-dim center" style="padding:24px;">No investment plans available.</div>';
+        return;
+      }
+      container.innerHTML = plans.map((p) => {
+        const features = Array.isArray(p.features) ? p.features : [];
+        return `<div class="plan-card">
+          <h4 class="plan-name">${escapeHtml(p.name)}</h4>
+          <div class="plan-range">$${Number(p.min_amount).toLocaleString()}${p.max_amount ? ' – $' + Number(p.max_amount).toLocaleString() : '+'}</div>
+          <div class="plan-roi"><span class="roi-pct">${p.daily_roi}%</span><span class="roi-lbl">Daily ROI</span></div>
+          <div class="plan-duration">${p.duration_days} days</div>
+          <ul class="plan-features">
+            ${features.map((f) => `<li>${escapeHtml(f)}</li>`).join('')}
+          </ul>
+          <a href="/register" class="btn btn-primary btn-block">Invest Now</a>
+        </div>`;
+      }).join('');
+    } catch (e) {
+      console.warn('[landing] failed to load plans:', e.message);
+    }
+  })();
+
   function escapeHtml(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
