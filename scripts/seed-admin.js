@@ -1,5 +1,5 @@
 const { hashPassword } = require('../src/utils/password');
-const { Admin, SiteSettings } = require('../src/models');
+const { Admin, SiteSettings, InvestmentPlans } = require('../src/models');
 
 const DEFAULT_ADMIN = {
   username: process.env.ADMIN_USERNAME || 'admin',
@@ -56,6 +56,14 @@ const DEFAULT_SETTINGS = {
   investment_roi: { 30: 8, 60: 15, 90: 25, 180: 45, 365: 70 },
 };
 
+const INVESTMENT_PLANS = [
+  { name: 'Starter', min_amount: 500, max_amount: 1999, daily_roi: 1.2, duration_days: 30, features: ['Basic support', 'Weekly reports'] },
+  { name: 'Silver', min_amount: 2000, max_amount: 4999, daily_roi: 1.8, duration_days: 60, features: ['Priority support', 'Daily reports', 'Auto-compounding'] },
+  { name: 'Gold', min_amount: 5000, max_amount: 9999, daily_roi: 2.5, duration_days: 90, features: ['Dedicated manager', 'Daily reports', 'Auto-compounding', 'Referral bonus'] },
+  { name: 'Platinum', min_amount: 10000, max_amount: 20000, daily_roi: 3.5, duration_days: 180, features: ['VIP manager', 'Real-time reports', 'Auto-compounding', 'Priority withdrawals', 'Referral bonus'] },
+  { name: 'Diamond', min_amount: 20001, max_amount: null, daily_roi: 5.0, duration_days: 365, features: ['VIP manager', 'Real-time reports', 'Auto-compounding', 'Priority withdrawals', 'Referral bonus', 'Exclusive signals'] },
+];
+
 const seedAdmin = async () => {
   try {
     const existing = await Admin.findByUsername(DEFAULT_ADMIN.username);
@@ -64,9 +72,7 @@ const seedAdmin = async () => {
     } else {
       const passwordHash = await hashPassword(DEFAULT_ADMIN.password);
       await Admin.createIfMissing({ username: DEFAULT_ADMIN.username, passwordHash });
-      console.log(
-        `[seed] ✓ created default admin  →  username: ${DEFAULT_ADMIN.username}  password: ${DEFAULT_ADMIN.password}`
-      );
+      console.log(`[seed] ✓ created default admin  →  username: ${DEFAULT_ADMIN.username}  password: ${DEFAULT_ADMIN.password}`);
     }
   } catch (e) {
     console.warn('[seed] could not seed admin (Supabase not configured?):', e.message);
@@ -89,14 +95,30 @@ const seedSettings = async () => {
   }
 };
 
+const seedInvestmentPlans = async () => {
+  try {
+    const existing = await InvestmentPlans.listAll();
+    if (existing.length > 0) {
+      console.log(`[seed] investment_plans already populated (${existing.length} plans) — skipping`);
+      return;
+    }
+    for (const plan of INVESTMENT_PLANS) {
+      await InvestmentPlans.create({ ...plan, isActive: true });
+    }
+    console.log(`[seed] ✓ seeded ${INVESTMENT_PLANS.length} investment plan(s)`);
+  } catch (e) {
+    console.warn('[seed] could not seed investment plans (Supabase not configured?):', e.message);
+  }
+};
+
 const seedAll = async () => {
   await seedAdmin();
   await seedSettings();
+  await seedInvestmentPlans();
 };
 
 module.exports = { seedAdmin, seedSettings, seedAll };
 
-// run directly
 if (require.main === module) {
   require('dotenv').config();
   seedAll()
