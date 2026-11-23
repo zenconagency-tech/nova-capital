@@ -104,6 +104,24 @@
 
     .invest-modal { max-width: 480px; }
     .invest-modal .field-hint { display: block; margin-top: 4px; }
+
+    .kpi-card {
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .kpi-card .kpi-value {
+      font-variant-numeric: tabular-nums;
+    }
+    .font-mono {
+      font-family: var(--font-mono);
+    }
+    .profit { color: var(--profit); }
+    .loss { color: var(--loss); }
   </style>
 </head>
 <body class="has-ticker">
@@ -169,13 +187,6 @@
           </div>
         </div>
 
-        <div class="kpi-row" id="kpiRow">
-          <div class="kpi"><div class="l">Holdings value</div><div class="v mono" id="kInvested">—</div></div>
-          <div class="kpi"><div class="l">Holdings P&amp;L</div><div class="v mono" id="kPnl">—</div></div>
-          <div class="kpi"><div class="l">Return</div><div class="v mono" id="kPnlPct">—</div></div>
-          <div class="kpi"><div class="l">Open positions</div><div class="v mono" id="kPositions">—</div></div>
-        </div>
-
         <div style="height:20px;"></div>
 
         <div class="dash-grid">
@@ -200,17 +211,29 @@
           </div>
 
           <div class="card dash-card">
-            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
-              <h3 style="margin:0;">Performance · BTC</h3>
-              <select id="chartRange" class="select" style="min-width:130px;">
-                <option value="1D">1D</option>
-                <option value="5D">5D</option>
-                <option value="1M" selected>1M</option>
-                <option value="3M">3M</option>
-                <option value="1Y">1Y</option>
-              </select>
+            <h3 style="margin:0 0 16px 0; font-size:16px; font-weight:700;">Account summary</h3>
+            <div class="kpi-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:12px;">
+              <div class="kpi-card">
+                <div class="kpi-label" style="font-size:11px; color:var(--text-2); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;">Available balance</div>
+                <div class="kpi-value" style="font-size:20px; font-weight:700; color:var(--text-0); font-family:var(--font-mono);" id="kAvailableBalance">$0.00</div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-label" style="font-size:11px; color:var(--text-2); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;">Holdings value</div>
+                <div class="kpi-value" style="font-size:20px; font-weight:700; color:var(--text-0); font-family:var(--font-mono);" id="kHoldingsValue">$0.00</div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-label" style="font-size:11px; color:var(--text-2); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;">Total equity</div>
+                <div class="kpi-value" style="font-size:20px; font-weight:700; color:var(--text-0); font-family:var(--font-mono);" id="kTotalEquity">$0.00</div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-label" style="font-size:11px; color:var(--text-2); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;">Unrealized P&amp;L</div>
+                <div class="kpi-value" style="font-size:20px; font-weight:700; color:var(--text-0); font-family:var(--font-mono);" id="kUnrealizedPnl">$0.00</div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-label" style="font-size:11px; color:var(--text-2); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;">Open positions</div>
+                <div class="kpi-value" style="font-size:20px; font-weight:700; color:var(--text-0); font-family:var(--font-mono);" id="kOpenPositions">0</div>
+              </div>
             </div>
-            <canvas id="dashChart" height="280"></canvas>
           </div>
         </div>
 
@@ -571,22 +594,22 @@
     /* ============================================================
        Overview
        ============================================================ */
-    let dashChart = null;
     const renderOverview = async () => {
       try {
         const { data: { summary = {}, holdings = [] } } = await NovaAPI.portfolio();
         const balance = Number(currentUser.balance) || 0;
+        const invested = Number(summary.invested) || 0;
+        const pnl = Number(summary.pnl) || 0;
+        const equity = balance + invested;
 
-        document.getElementById('kBalance').textContent = NovaFormat.price(balance);
+        document.getElementById('kAvailableBalance').textContent = NovaFormat.price(balance);
         document.getElementById('wdAvailable').textContent = NovaFormat.price(balance);
-        document.getElementById('kInvested').textContent = NovaFormat.price(summary.invested);
-        const pnlEl = document.getElementById('kPnl');
-        pnlEl.textContent = (summary.pnl >= 0 ? '+' : '') + NovaFormat.price(summary.pnl);
-        pnlEl.className = 'v mono ' + (summary.pnl >= 0 ? 'profit' : 'loss');
-        const pnlPctEl = document.getElementById('kPnlPct');
-        pnlPctEl.textContent = NovaFormat.pct(summary.pnl_pct);
-        pnlPctEl.className = 'v mono ' + (summary.pnl_pct >= 0 ? 'profit' : 'loss');
-        document.getElementById('kPositions').textContent = holdings.length;
+        document.getElementById('kHoldingsValue').textContent = NovaFormat.price(invested);
+        document.getElementById('kTotalEquity').textContent = NovaFormat.price(equity);
+        const pnlEl = document.getElementById('kUnrealizedPnl');
+        pnlEl.textContent = (pnl >= 0 ? '+' : '') + NovaFormat.price(pnl);
+        pnlEl.className = 'kpi-value ' + (pnl >= 0 ? 'profit' : 'loss') + ' font-mono';
+        document.getElementById('kOpenPositions').textContent = holdings.length;
 
         const body = document.getElementById('holdingsBody');
         if (!holdings.length) {
@@ -616,32 +639,6 @@
         if (e.status === 401) { NovaAPI.setToken(null); location.replace('/login'); }
       }
     };
-
-    const renderDashChart = async (range = '1M') => {
-      try {
-        const { data: { candles } } = await NovaAPI.history('BTC', range);
-        const data = candles.map((c) => ({ x: c.t, y: c.c }));
-        const ctx = document.getElementById('dashChart').getContext('2d');
-        if (dashChart) dashChart.destroy();
-        const grad = ctx.createLinearGradient(0, 0, 0, 280);
-        grad.addColorStop(0, 'rgba(0, 212, 255, 0.30)');
-        grad.addColorStop(1, 'rgba(0, 212, 255, 0)');
-        dashChart = new Chart(ctx, {
-          type: 'line',
-          data: { datasets: [{ data, borderColor: '#00D4FF', borderWidth: 2, pointRadius: 0, tension: 0.3, fill: { target: 'origin', above: grad } }] },
-          options: {
-            responsive: true, maintainAspectRatio: false,
-            interaction: { intersect: false, mode: 'index' },
-            plugins: { tooltip: { callbacks: { label: (c) => NovaFormat.price(c.parsed.y) } } },
-            scales: {
-              x: { type: 'time', time: { unit: range === '1D' ? 'hour' : 'day' }, grid: { display: false } },
-              y: { position: 'right', grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { callback: (v) => '$' + Number(v).toLocaleString(), maxTicksLimit: 5 } },
-            },
-          },
-        });
-      } catch (e) { console.warn(e); }
-    };
-    document.getElementById('chartRange').addEventListener('change', (e) => renderDashChart(e.target.value));
 
     /* ============================================================
        Utils
@@ -1155,7 +1152,6 @@
     (async () => {
       await refreshUser();
       renderOverview();
-      renderDashChart('1M');
       renderDeposits();
       renderWithdrawals();
       renderWatch();
