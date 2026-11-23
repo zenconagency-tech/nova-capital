@@ -126,6 +126,54 @@ module.exports = {
     return sendOk(res, { user, investments: list });
   },
 
+  /* PATCH /api/admin/investments/:id */
+  async updateInvestment(req, res) {
+    const { status, amount, assetLabel, durationDays, planId } = req.body;
+    const inv = await UserInvestments.findById(req.params.id);
+    if (!inv) throw new HttpError(404, 'Investment not found');
+
+    const update = {};
+    if (status !== undefined) {
+      if (!['active', 'completed', 'cancelled'].includes(status)) {
+        throw new HttpError(400, 'Invalid status');
+      }
+      update.status = status;
+    }
+    if (amount !== undefined) {
+      const amt = Number(amount);
+      if (!Number.isFinite(amt) || amt <= 0) throw new HttpError(400, 'Invalid amount');
+      update.amount = amt;
+    }
+    if (assetLabel !== undefined) update.asset_label = assetLabel;
+    if (durationDays !== undefined) {
+      const days = Number(durationDays);
+      if (!Number.isFinite(days) || days <= 0) throw new HttpError(400, 'Invalid duration');
+      update.duration_days = days;
+    }
+    if (planId !== undefined) update.plan_id = planId || null;
+
+    const updated = await UserInvestments.update(req.params.id, update);
+    return sendOk(res, { investment: updated }, 'Investment updated.');
+  },
+
+  /* DELETE /api/admin/investments/:id */
+  async deleteInvestment(req, res) {
+    const inv = await UserInvestments.findById(req.params.id);
+    if (!inv) throw new HttpError(404, 'Investment not found');
+
+    // Refund balance if the investment is active
+    if (inv.status === 'active') {
+      const user = await Users.findById(inv.user_id);
+      if (user) {
+        const newBalance = Math.round((Number(user.balance) + Number(inv.amount)) * 100) / 100;
+        await Users.adminSetBalance(user.id, newBalance);
+      }
+    }
+
+    await UserInvestments.delete(req.params.id);
+    return sendOk(res, { deleted: true, id: req.params.id }, 'Investment deleted.');
+  },
+
   /* ============================================================
    *                       USERS
    * ============================================================ */

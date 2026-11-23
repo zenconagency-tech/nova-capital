@@ -217,6 +217,29 @@ router.get(
   asyncHandler(adminController.getUserInvestments)
 );
 
+router.patch(
+  '/investments/:id',
+  adminRequired,
+  [
+    param('id').isUUID(),
+    body('status').optional().isIn(['active', 'completed', 'cancelled']),
+    body('amount').optional().isFloat({ gt: 0 }),
+    body('assetLabel').optional().isString().notEmpty(),
+    body('durationDays').optional().isInt({ gt: 0 }),
+    body('planId').optional().isString(),
+  ],
+  validate,
+  asyncHandler(adminController.updateInvestment)
+);
+
+router.delete(
+  '/investments/:id',
+  adminRequired,
+  [param('id').isUUID()],
+  validate,
+  asyncHandler(adminController.deleteInvestment)
+);
+
 /* ============================================================
  *                  INVESTMENT PLANS (admin)
  * ============================================================ */

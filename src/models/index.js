@@ -749,6 +749,15 @@ const UserInvestments = {
     if (error) throw error;
     return data || [];
   },
+
+  async delete(id) {
+    const { error } = await useAdmin()
+      .from('user_investments')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+    return { deleted: true, id };
+  },
 };
 
 module.exports = { Users, Holdings, Watchlist, Withdrawals, EmailTokens, Admin, SiteSettings, Deposits, InvestmentPlans, UserInvestments };

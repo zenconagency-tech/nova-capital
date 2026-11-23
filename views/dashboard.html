@@ -1161,7 +1161,6 @@
       renderWatch();
       renderPlans();
       setInterval(() => { renderOverview(); renderDeposits(); renderWithdrawals(); renderWatch(); }, 15000);
-      setInterval(() => renderDashChart(document.getElementById('chartRange').value), 30000);
     })();
 
     function escapeHtml(s) {

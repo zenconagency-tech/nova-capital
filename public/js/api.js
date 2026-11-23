@@ -133,6 +133,8 @@
       return request('GET', `/api/admin/investments?${qs}`, undefined, { admin: true });
     },
     adminGetUserInvestments: (id) => request('GET', `/api/admin/users/${id}/investments`, undefined, { admin: true }),
+    adminUpdateInvestment: (id, p) => request('PATCH', `/api/admin/investments/${id}`, p, { admin: true }),
+    adminDeleteInvestment: (id) => request('DELETE', `/api/admin/investments/${id}`, undefined, { admin: true }),
     adminListInvestmentPlans: () => request('GET', '/api/admin/investment-plans', undefined, { admin: true }),
     adminCreateInvestmentPlan: (p) => request('POST', '/api/admin/investment-plans', p, { admin: true }),
     adminUpdateInvestmentPlan: (id, p) => request('PATCH', `/api/admin/investment-plans/${id}`, p, { admin: true }),

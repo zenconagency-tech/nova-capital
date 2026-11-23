@@ -124,7 +124,6 @@
   });
 
   renderHero();
-  setInterval(renderHero, 5000);
 
   // ============================================================
   // Featured chart (candlestick + line + area)
@@ -304,5 +303,4 @@
   });
 
   renderFeatured();
-  setInterval(renderFeatured, 6000);
 })();

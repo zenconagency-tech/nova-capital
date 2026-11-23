@@ -283,6 +283,7 @@
             <div>Plan</div>
             <div>Duration</div>
             <div>Status</div>
+            <div class="num">Actions</div>
           </div>
           <div id="invList"></div>
         </div>
@@ -572,6 +573,41 @@
         <div style="display:flex; gap:10px; justify-content:flex-end;">
           <button type="button" class="btn btn-ghost" id="planCancel">Cancel</button>
           <button type="submit" class="btn btn-primary">Save Plan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="editInvestmentModal">
+    <div class="modal" style="max-width:560px;">
+      <h3 id="editInvModalTitle">Edit Investment</h3>
+      <form id="editInvestmentForm">
+        <input type="hidden" id="editInvId" />
+        <div class="form-group">
+          <label for="editInvAssetLabel">Asset Label</label>
+          <input id="editInvAssetLabel" class="input" type="text" required />
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="editInvAmount">Amount (USD)</label>
+            <input id="editInvAmount" type="number" min="0.01" step="0.01" class="input" required />
+          </div>
+          <div class="form-group">
+            <label for="editInvDuration">Duration (days)</label>
+            <input id="editInvDuration" type="number" min="1" step="1" class="input" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="editInvStatus">Status</label>
+          <select id="editInvStatus" class="select">
+            <option value="active">Active</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+          <button type="button" class="btn btn-ghost" id="editInvCancel">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Investment</button>
         </div>
       </form>
     </div>

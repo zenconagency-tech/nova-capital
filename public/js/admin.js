@@ -666,8 +666,26 @@
           <div style="color:var(--text-2);">${escapeHtml(inv.asset_label)}</div>
           <div class="text-dim">${inv.duration_days}d</div>
           <div>${statusPillInv(inv.status)}</div>
+          <div class="row-actions">
+            <button class="btn btn-ghost btn-sm" data-act="edit-inv" data-id="${inv.id}">Edit</button>
+            <button class="btn btn-ghost btn-sm text-red-600 border-red-300" data-act="delete-inv" data-id="${inv.id}">Delete</button>
+          </div>
         </div>`;
       }).join('');
+
+      list.querySelectorAll('[data-act="edit-inv"]').forEach((btn) => {
+        btn.addEventListener('click', () => openEditInvestmentModal(btn.dataset.id));
+      });
+      list.querySelectorAll('[data-act="delete-inv"]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('Delete this investment? This cannot be undone.')) return;
+          try {
+            await NovaAPI.adminDeleteInvestment(btn.dataset.id);
+            NovaToast.success('Investment deleted.');
+            loadUserInvestments();
+          } catch (e) { NovaToast.error(e.message); }
+        });
+      });
     } catch (e) {
       if (e.status === 401) { NovaAPI.setAdminToken(null); location.replace('/admin/login.html'); return; }
       NovaToast.error(e.message);
@@ -784,6 +802,41 @@
       loadPlans();
     } catch (e) { NovaToast.error(e.message); }
   };
+
+  /* ============================================================
+     EDIT INVESTMENT MODAL
+     ============================================================ */
+  const editInvModal = $('#editInvestmentModal');
+  const openEditInvestmentModal = async (id) => {
+    const inv = state.investments.find((i) => i.id === id);
+    if (!inv) return;
+    $('#editInvId').value = inv.id;
+    $('#editInvAssetLabel').value = inv.asset_label || '';
+    $('#editInvAmount').value = inv.amount;
+    $('#editInvDuration').value = inv.duration_days;
+    $('#editInvStatus').value = inv.status;
+    editInvModal.classList.add('open');
+  };
+  $('#editInvCancel')?.addEventListener('click', () => editInvModal.classList.remove('open'));
+  $('#editInvestmentForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = $('#editInvId').value;
+    const payload = {
+      assetLabel: $('#editInvAssetLabel').value.trim(),
+      amount: Number($('#editInvAmount').value),
+      durationDays: Number($('#editInvDuration').value),
+      status: $('#editInvStatus').value,
+    };
+    if (!payload.assetLabel || !Number.isFinite(payload.amount) || payload.amount <= 0) {
+      return NovaToast.warning('Please fill in all fields correctly.');
+    }
+    try {
+      await NovaAPI.adminUpdateInvestment(id, payload);
+      NovaToast.success('Investment updated.');
+      editInvModal.classList.remove('open');
+      loadUserInvestments();
+    } catch (e) { NovaToast.error(e.message); }
+  });
 
   /* ============================================================
      BOOT
