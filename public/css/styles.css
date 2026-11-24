@@ -388,12 +388,13 @@ body.has-ticker .navbar { top: 0; }
 }
 .hero-grid {
   display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
-  gap: 56px;
+  grid-template-columns: 1fr;
+  gap: 40px;
   align-items: center;
+  max-width: 860px;
 }
 @media (max-width: 980px) {
-  .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+  .hero-grid { max-width: none; }
   .hero { padding: 80px 0 56px; }
 }
 
@@ -444,79 +445,6 @@ body.has-ticker .navbar { top: 0; }
 .hero-stat .v { font-size: 22px; font-weight: 700; color: var(--text-0); }
 .hero-stat .l { color: var(--text-3); font-size: 12.5px; letter-spacing: 0.06em; text-transform: uppercase; }
 
-/* hero chart card */
-.hero-chart {
-  background: linear-gradient(180deg, var(--bg-2) 0%, var(--bg-1) 100%);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  padding: 22px;
-  box-shadow: 0 30px 80px rgba(0,0,0,0.45);
-  position: relative;
-  overflow: hidden;
-}
-.hero-chart::before {
-  content: ""; position: absolute; inset: 0;
-  background: radial-gradient(600px 300px at 80% 0%, rgba(0,212,255,0.10), transparent 60%);
-  pointer-events: none;
-}
-.hero-chart .head {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 14px; gap: 12px;
-}
-.hero-chart .pair { display: flex; align-items: center; gap: 10px; }
-.hero-chart .pair .ic {
-  width: 36px; height: 36px; border-radius: 10px;
-  display: grid; place-items: center;
-  background: linear-gradient(180deg, rgba(0,212,255,0.20), rgba(0,212,255,0.04));
-  border: 1px solid rgba(0,212,255,0.30);
-  color: var(--accent); font-weight: 700;
-}
-.hero-chart .pair .nm { color: var(--text-0); font-weight: 600; }
-.hero-chart .pair .sm { color: var(--text-3); font-size: 12px; }
-.hero-chart .price-big {
-  font-size: 28px; font-weight: 700; color: var(--text-0);
-  font-variant-numeric: tabular-nums;
-  font-family: var(--font-mono);
-  margin: 4px 0 12px;
-}
-.hero-chart .price-big .chg {
-  font-size: 13px; font-weight: 600; margin-left: 10px;
-  font-family: var(--font-sans);
-  padding: 4px 8px; border-radius: 6px;
-}
-.hero-chart .price-big .chg.up { color: var(--profit); background: var(--profit-soft); }
-.hero-chart .price-big .chg.down { color: var(--loss); background: var(--loss-soft); }
-
-.hero-chart .ranges { display: flex; gap: 4px; }
-.hero-chart .ranges button {
-  padding: 4px 10px; font-size: 12px; color: var(--text-3);
-  border-radius: 6px;
-}
-.hero-chart .ranges button.active { color: var(--accent); background: var(--accent-soft); }
-.hero-chart .ranges button:hover { color: var(--text-0); }
-
-#heroChart { width: 100%; height: 280px; }
-
-.hero-floating {
-  position: absolute; bottom: -22px; left: 24px; right: 24px;
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
-}
-.hero-floating .pill {
-  background: var(--bg-3);
-  border: 1px solid var(--border-strong);
-  border-radius: 12px;
-  padding: 10px 12px;
-  display: flex; align-items: center; gap: 8px;
-  font-size: 12.5px;
-  box-shadow: var(--shadow-2);
-}
-.hero-floating .pill .v { color: var(--text-0); font-weight: 600; }
-.hero-floating .pill .l { color: var(--text-3); font-size: 11px; }
-@media (max-width: 720px) {
-  #heroChart { height: 220px; }
-  .hero-floating { display: none; }
-}
-
 /* ============================================================================
    MARKETS CATEGORY CARDS
    ============================================================================ */
@@ -560,56 +488,13 @@ body.has-ticker .navbar { top: 0; }
 .market-card[data-class="commodity"] .ic { background: rgba(255, 181, 71, 0.10); color: var(--gold); border-color: rgba(255,214,107,0.25); }
 
 /* ============================================================================
-   FEATURED CHART
-   ============================================================================ */
-.featured-chart-card {
-  padding: 28px;
-}
-.featured-chart-card .head {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 12px; flex-wrap: wrap; margin-bottom: 20px;
-}
-.featured-chart-card .symbol-info { display: flex; align-items: center; gap: 12px; }
-.featured-chart-card .symbol-info .ic {
-  width: 42px; height: 42px; border-radius: 12px;
-  display: grid; place-items: center;
-  background: var(--accent-soft);
-  color: var(--accent); font-weight: 700;
-  border: 1px solid rgba(0, 212, 255, 0.25);
-}
-.featured-chart-card h3 { margin: 0; font-size: 18px; color: var(--text-0); }
-.featured-chart-card .symbol-info .sub { color: var(--text-3); font-size: 12.5px; }
-
-.featured-chart-card .price { font-size: 28px; font-weight: 700; color: var(--text-0); font-family: var(--font-mono); }
-.featured-chart-card .price .chg { font-size: 13px; margin-left: 10px; padding: 3px 8px; border-radius: 6px; }
-.featured-chart-card .price .chg.up { color: var(--profit); background: var(--profit-soft); }
-.featured-chart-card .price .chg.down { color: var(--loss); background: var(--loss-soft); }
-
-.featured-stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-top: 18px;
-  padding-top: 18px;
-  border-top: 1px solid var(--border);
-}
-.featured-stats .item .l { color: var(--text-3); font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; }
-.featured-stats .item .v { color: var(--text-0); font-weight: 600; font-variant-numeric: tabular-nums; margin-top: 4px; }
-@media (max-width: 720px) {
-  .featured-stats { grid-template-columns: repeat(2, 1fr); }
-}
-
-#featuredChart { width: 100%; height: 360px; }
-
-/* ============================================================================
    PORTFOLIO DASHBOARD
    ============================================================================ */
 .portfolio-grid {
   display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
+  grid-template-columns: 1fr;
   gap: 24px;
 }
-@media (max-width: 980px) { .portfolio-grid { grid-template-columns: 1fr; } }
 
 .portfolio-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
 .portfolio-summary .item {
@@ -645,21 +530,6 @@ body.has-ticker .navbar { top: 0; }
 .holdings-table .up { color: var(--profit); }
 .holdings-table .down { color: var(--loss); }
 .holdings-table .num { text-align: right; }
-
-.donut-wrap {
-  display: flex; flex-direction: column; align-items: center; gap: 16px;
-}
-.donut-wrap .donut-legend { width: 100%; }
-.donut-legend .row {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 8px 0; border-bottom: 1px solid var(--border);
-  font-size: 13.5px;
-}
-.donut-legend .row:last-child { border-bottom: 0; }
-.donut-legend .row .l { display: flex; align-items: center; gap: 8px; }
-.donut-legend .row .dot { width: 10px; height: 10px; border-radius: 3px; }
-.donut-legend .row .pct { color: var(--text-2); font-variant-numeric: tabular-nums; }
-#donutChart { max-width: 260px; }
 
 /* ============================================================================
    FEATURES
@@ -853,8 +723,6 @@ body.has-ticker .navbar { top: 0; }
 .kpi .v { color: var(--text-0); font-size: 22px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; }
 .kpi .v.profit { color: var(--profit); }
 .kpi .v.loss { color: var(--loss); }
-
-#dashChart { width: 100%; height: 280px; }
 
 .watchlist-add { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
 .watchlist-add .input { flex: 1; min-width: 100px; }

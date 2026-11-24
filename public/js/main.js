@@ -73,23 +73,10 @@
     }
   };
 
-  // Click on a category card: scroll to the chart and pre-select an asset
+  // Click on a category card: open the markets page
   document.querySelectorAll('.market-card').forEach((card) => {
     card.addEventListener('click', () => {
-      const cls = card.dataset.class;
-      const select = document.getElementById('featuredSymbolSelect');
-      if (select) {
-        // Find the first option in the matching optgroup
-        const group = select.querySelector(`optgroup[label="${cls[0].toUpperCase() + cls.slice(1)}${cls === 'forex' ? '' : 's'}"]`)
-          || select.querySelector(`optgroup[label="${cls === 'forex' ? 'Forex' : cls[0].toUpperCase() + cls.slice(1) + 's'}"]`);
-        const opt = group ? group.querySelector('option') : null;
-        if (opt) {
-          select.value = opt.value;
-          select.dispatchEvent(new Event('change'));
-        }
-      }
-      const target = document.getElementById('chart');
-      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      location.href = '/markets';
     });
   });
 

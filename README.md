@@ -1,6 +1,6 @@
 # Nova Capital — Premium Investment Platform
 
-A full-stack, production-style investment platform: **Node.js + Express + Supabase (PostgreSQL) + JWT + bcrypt + Nodemailer**, served alongside a vanilla-JS / Chart.js front-end with a deep-dark fintech UI.
+A full-stack, production-style investment platform: **Node.js + Express + Supabase (PostgreSQL) + JWT + bcrypt + Nodemailer**, served alongside a vanilla-JS front-end with a deep-dark fintech UI.
 
 The platform ships with:
 - **User auth** — register, login, email verification, password reset, JWT cookies
@@ -39,7 +39,7 @@ The platform ships with:
 | Rate limiting    | `express-rate-limit` (global + per-route)                                        |
 | Database         | Supabase (PostgreSQL) via `@supabase/supabase-js` (service-role for admin ops)   |
 | Email            | Nodemailer (SMTP) — works with any provider (Gmail, SendGrid, Postmark, SES…)    |
-| Frontend         | Vanilla JS, Chart.js 4 + chartjs-chart-financial, no build step                   |
+| Frontend         | Vanilla JS, no build step                                                         |
 | Design           | Custom CSS, deep dark `#0A0B0E` + cyan accent `#00D4FF`, Inter / Space Grotesk / JetBrains Mono |
 
 ---
@@ -103,8 +103,7 @@ projetrastav2/
 │   │   ├── format.js          # price/percent/number formatters
 │   │   ├── toast.js           # toast notification system
 │   │   ├── ticker.js          # auto-scrolling market ticker
-│   │   ├── charts.js          # Chart.js wrappers for hero + featured chart
-│   │   ├── portfolio.js       # donut + holdings table for landing page
+│   │   ├── portfolio.js       # holdings table for landing page
 │   │   ├── main.js            # navbar + auth-aware shell + landing-page wiring
 │   │   └── admin.js           # admin panel controller (sidebar nav, tables, modals)
 │   └── favicon, etc.

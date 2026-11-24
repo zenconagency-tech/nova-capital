@@ -27,7 +27,6 @@
       <nav>
         <ul class="nav-links" id="navLinks">
           <li><a href="#markets">Markets</a></li>
-          <li><a href="#chart">Charts</a></li>
           <li><a href="#portfolio">Portfolio</a></li>
           <li><a href="#features">Features</a></li>
           <li><a href="#invest">Invest</a></li>
@@ -53,7 +52,7 @@
 
   <!-- ============== HERO ============== -->
   <section class="hero">
-      <div class="container hero-grid">
+    <div class="container hero-grid">
       <div class="fade-in">
         <span class="eyebrow"><span class="dot"></span> Markets are open · live</span>
         <h1 id="heroHeadline">
@@ -68,7 +67,7 @@
           <a href="/register" class="btn btn-primary btn-lg">Start trading free
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </a>
-          <a href="#chart" class="btn btn-secondary btn-lg">View live charts</a>
+          <a href="#markets" class="btn btn-secondary btn-lg">Explore markets</a>
         </div>
 
         <div class="hero-stats">
@@ -76,41 +75,6 @@
           <div class="hero-stat"><div class="v">820k+</div><div class="l">Active traders</div></div>
           <div class="hero-stat"><div class="v">120+</div><div class="l">Markets</div></div>
           <div class="hero-stat"><div class="v">4.9★</div><div class="l">App rating</div></div>
-        </div>
-      </div>
-
-      <div class="hero-chart fade-in" style="animation-delay:.15s">
-        <div class="head">
-          <div class="pair">
-            <div class="ic">₿</div>
-            <div>
-              <div class="nm">Bitcoin / USD</div>
-              <div class="sm">BTC · Crypto</div>
-            </div>
-          </div>
-          <div class="ranges" id="heroRanges">
-            <button data-range="1D" class="active">1D</button>
-            <button data-range="5D">5D</button>
-            <button data-range="1M">1M</button>
-            <button data-range="3M">3M</button>
-            <button data-range="1Y">1Y</button>
-          </div>
-        </div>
-        <div class="price-big" id="heroPrice">$67,500.00 <span class="chg up" id="heroChange">+2.34%</span></div>
-        <canvas id="heroChart"></canvas>
-        <div class="hero-floating">
-          <div class="pill">
-            <span style="color:var(--profit)">●</span>
-            <div><div class="l">High</div><div class="v" id="heroHigh">$68,200</div></div>
-          </div>
-          <div class="pill">
-            <span style="color:var(--loss)">●</span>
-            <div><div class="l">Low</div><div class="v" id="heroLow">$65,800</div></div>
-          </div>
-          <div class="pill">
-            <span style="color:var(--accent)">●</span>
-            <div><div class="l">Vol</div><div class="v" id="heroVol">$1.2B</div></div>
-          </div>
         </div>
       </div>
     </div>
@@ -174,97 +138,6 @@
     </div>
   </section>
 
-  <!-- ============== FEATURED CHART ============== -->
-  <section class="section" id="chart" style="padding-top:32px;">
-    <div class="container">
-      <div class="section-title">
-        <span class="eyebrow">Charts</span>
-        <h2>Pro-grade charts, zero clutter</h2>
-        <p>Candlesticks, line, and area views with lightning-fast time range selectors. Switch instruments in a click.</p>
-      </div>
-
-      <div class="card featured-chart-card">
-        <div class="head">
-          <div class="symbol-info">
-            <div class="ic" id="featuredIcon">₿</div>
-            <div>
-              <h3 id="featuredName">Bitcoin / USD</h3>
-              <div class="sub" id="featuredSymbol">BTC · Crypto</div>
-            </div>
-          </div>
-
-          <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <select id="featuredSymbolSelect" class="select" style="min-width:200px;">
-              <optgroup label="Crypto">
-                <option value="BTC">Bitcoin (BTC)</option>
-                <option value="ETH">Ethereum (ETH)</option>
-                <option value="SOL">Solana (SOL)</option>
-                <option value="BNB">BNB</option>
-                <option value="XRP">XRP</option>
-                <option value="ADA">Cardano (ADA)</option>
-                <option value="DOGE">Dogecoin (DOGE)</option>
-              </optgroup>
-              <optgroup label="Stocks">
-                <option value="AAPL">Apple (AAPL)</option>
-                <option value="MSFT">Microsoft (MSFT)</option>
-                <option value="GOOGL">Alphabet (GOOGL)</option>
-                <option value="AMZN">Amazon (AMZN)</option>
-                <option value="TSLA">Tesla (TSLA)</option>
-                <option value="NVDA">NVIDIA (NVDA)</option>
-                <option value="META">Meta (META)</option>
-                <option value="SPY">S&P 500 ETF (SPY)</option>
-                <option value="QQQ">Nasdaq 100 ETF (QQQ)</option>
-              </optgroup>
-              <optgroup label="Futures">
-                <option value="ES">E-mini S&P (ES)</option>
-                <option value="NQ">E-mini Nasdaq (NQ)</option>
-                <option value="CL">Crude Oil (CL)</option>
-                <option value="GC">Gold (GC)</option>
-              </optgroup>
-              <optgroup label="Forex">
-                <option value="EURUSD">EUR / USD</option>
-                <option value="GBPUSD">GBP / USD</option>
-                <option value="USDJPY">USD / JPY</option>
-                <option value="AUDUSD">AUD / USD</option>
-              </optgroup>
-              <optgroup label="Commodities">
-                <option value="XAU">Gold (XAU)</option>
-                <option value="XAG">Silver (XAG)</option>
-                <option value="OIL">WTI Crude (OIL)</option>
-                <option value="NGAS">Natural Gas (NGAS)</option>
-              </optgroup>
-            </select>
-
-            <div class="ranges" id="featuredRanges" style="display:flex; gap:4px;">
-              <button data-range="1D" class="btn btn-ghost btn-sm">1D</button>
-              <button data-range="5D" class="btn btn-ghost btn-sm">5D</button>
-              <button data-range="1M" class="btn btn-ghost btn-sm active">1M</button>
-              <button data-range="3M" class="btn btn-ghost btn-sm">3M</button>
-              <button data-range="1Y" class="btn btn-ghost btn-sm">1Y</button>
-              <button data-range="ALL" class="btn btn-ghost btn-sm">ALL</button>
-            </div>
-
-            <div class="ranges" id="featuredChartType" style="display:flex; gap:4px;">
-              <button data-type="candlestick" class="btn btn-ghost btn-sm active">Candle</button>
-              <button data-type="line" class="btn btn-ghost btn-sm">Line</button>
-              <button data-type="area" class="btn btn-ghost btn-sm">Area</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="price" id="featuredPrice">$67,500.00 <span class="chg up" id="featuredChange">+2.34%</span></div>
-        <canvas id="featuredChart"></canvas>
-
-        <div class="featured-stats">
-          <div class="item"><div class="l">24h High</div><div class="v" id="featuredHigh">—</div></div>
-          <div class="item"><div class="l">24h Low</div><div class="v" id="featuredLow">—</div></div>
-          <div class="item"><div class="l">24h Volume</div><div class="v" id="featuredVol">—</div></div>
-          <div class="item"><div class="l">Asset Class</div><div class="v" id="featuredClass">—</div></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- ============== PORTFOLIO DASHBOARD ============== -->
   <section class="section" id="portfolio">
     <div class="container">
@@ -299,14 +172,6 @@
                 <tr><td colspan="6" class="text-dim center" style="padding:24px;">Sign in to see your portfolio.</td></tr>
               </tbody>
             </table>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3 style="margin:0 0 16px; font-size:15px; color:var(--text-0);">Allocation</h3>
-          <div class="donut-wrap">
-            <canvas id="donutChart" width="260" height="260"></canvas>
-            <div class="donut-legend" id="donutLegend"></div>
           </div>
         </div>
       </div>
@@ -469,7 +334,6 @@
           <h4>Product</h4>
           <ul>
             <li><a href="#markets">Markets</a></li>
-            <li><a href="#chart">Charts</a></li>
             <li><a href="#portfolio">Portfolio</a></li>
             <li><a href="#invest">Invest</a></li>
           </ul>
@@ -519,16 +383,10 @@
     </a>
   </footer>
 
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@0.2.1/dist/chartjs-chart-financial.min.js"></script>
-
   <script src="/js/api.js"></script>
   <script src="/js/format.js"></script>
   <script src="/js/toast.js"></script>
   <script src="/js/ticker.js"></script>
-  <script src="/js/charts.js"></script>
   <script src="/js/portfolio.js"></script>
   <script src="/js/main.js"></script>
 </body>
