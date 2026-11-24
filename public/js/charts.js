@@ -22,6 +22,7 @@
   Chart.defaults.plugins.tooltip.cornerRadius = 8;
   Chart.defaults.plugins.tooltip.displayColors = true;
   Chart.defaults.plugins.tooltip.boxPadding = 6;
+  Chart.defaults.animation = false;
 
   const buildGradient = (ctx, area, color, opacity) => {
     if (!area) return color;

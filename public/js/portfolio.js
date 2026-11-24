@@ -113,6 +113,7 @@
             options: {
               responsive: true,
               maintainAspectRatio: false,
+              animation: false,
               cutout: '70%',
               plugins: {
                 tooltip: {
@@ -152,5 +153,4 @@
   };
 
   render();
-  setInterval(render, 12000);
 })();
