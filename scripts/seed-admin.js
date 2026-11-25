@@ -98,14 +98,18 @@ const seedSettings = async () => {
 const seedInvestmentPlans = async () => {
   try {
     const existing = await InvestmentPlans.listAll();
-    if (existing.length > 0) {
-      console.log(`[seed] investment_plans already populated (${existing.length} plans) — skipping`);
+    const existingNames = new Set(existing.map((p) => String(p.name || '').trim().toLowerCase()));
+    const missing = INVESTMENT_PLANS.filter(
+      (p) => !existingNames.has(p.name.trim().toLowerCase())
+    );
+    if (!missing.length) {
+      console.log(`[seed] investment_plans up to date (${existing.length} plans) — skipping`);
       return;
     }
-    for (const plan of INVESTMENT_PLANS) {
+    for (const plan of missing) {
       await InvestmentPlans.create({ ...plan, isActive: true });
     }
-    console.log(`[seed] ✓ seeded ${INVESTMENT_PLANS.length} investment plan(s)`);
+    console.log(`[seed] ✓ added ${missing.length} missing investment plan(s)`);
   } catch (e) {
     console.warn('[seed] could not seed investment plans (Supabase not configured?):', e.message);
   }

@@ -11,6 +11,7 @@ async function getRoiRates() {
 
 module.exports = {
   async listPlans(req, res) {
+    res.set('Cache-Control', 'no-store, max-age=0');
     const plans = await InvestmentPlans.listAll();
     return sendOk(res, { plans: plans.filter((p) => p.is_active) });
   },

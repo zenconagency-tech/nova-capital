@@ -227,13 +227,19 @@ create table if not exists public.investment_plans (
   updated_at    timestamptz not null default now()
 );
 
--- Seed default investment plans
-insert into public.investment_plans (name, min_amount, max_amount, daily_roi, duration_days, features) values
-  ('Starter', 500, 1999, 1.2, 30, '["Basic support", "Weekly reports"]'),
-  ('Silver', 2000, 4999, 1.8, 60, '["Priority support", "Daily reports", "Auto-compounding"]'),
-  ('Gold', 5000, 9999, 2.5, 90, '["Dedicated manager", "Daily reports", "Auto-compounding", "Referral bonus"]'),
-  ('Platinum', 10000, 20000, 3.5, 180, '["VIP manager", "Real-time reports", "Auto-compounding", "Priority withdrawals", "Referral bonus"]')
-on conflict do nothing;
+-- Seed default investment plans (idempotent by name)
+insert into public.investment_plans (name, min_amount, max_amount, daily_roi, duration_days, features)
+select v.name, v.min_amount, v.max_amount, v.daily_roi, v.duration_days, v.features::jsonb
+from (values
+  ('Starter',  500::numeric,  1999::numeric,  1.2::numeric, 30,  '["Basic support", "Weekly reports"]'),
+  ('Silver',   2000::numeric, 4999::numeric,  1.8::numeric, 60,  '["Priority support", "Daily reports", "Auto-compounding"]'),
+  ('Gold',     5000::numeric, 9999::numeric,  2.5::numeric, 90,  '["Dedicated manager", "Daily reports", "Auto-compounding", "Referral bonus"]'),
+  ('Platinum', 10000::numeric, 20000::numeric, 3.5::numeric, 180, '["VIP manager", "Real-time reports", "Auto-compounding", "Priority withdrawals", "Referral bonus"]'),
+  ('Diamond',  20001::numeric, null::numeric,  5.0::numeric, 365, '["VIP manager", "Real-time reports", "Auto-compounding", "Priority withdrawals", "Referral bonus", "Exclusive signals"]')
+) as v(name, min_amount, max_amount, daily_roi, duration_days, features)
+where not exists (
+  select 1 from public.investment_plans p where lower(p.name) = lower(v.name)
+);
 
 -- ---------------------------------------------------------------------------
 -- user_investments  (user investment records)

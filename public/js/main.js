@@ -138,16 +138,16 @@
   /* ============================================================
      Investment Plans — landing page
      ============================================================ */
-  (async () => {
-    const container = document.getElementById('landingPlanCards');
-    if (!container) return;
+  const planContainer = document.getElementById('landingPlanCards');
+  const loadLandingPlans = async () => {
+    if (!planContainer) return;
     try {
       const { data: { plans = [] } } = await NovaAPI.investmentPlans();
       if (!plans.length) {
-        container.innerHTML = '<div class="text-dim center" style="padding:24px;">No investment plans available.</div>';
+        planContainer.innerHTML = '<div class="text-dim center" style="padding:24px;">No investment plans available.</div>';
         return;
       }
-      container.innerHTML = plans.map((p) => {
+      planContainer.innerHTML = plans.map((p) => {
         const features = Array.isArray(p.features) ? p.features : [];
         return `<div class="plan-card">
           <h4 class="plan-name">${escapeHtml(p.name)}</h4>
@@ -162,8 +162,13 @@
       }).join('');
     } catch (e) {
       console.warn('[landing] failed to load plans:', e.message);
+      planContainer.innerHTML = '<div class="text-dim center" style="padding:24px;">Unable to load investment plans. Please refresh the page.</div>';
     }
-  })();
+  };
+  loadLandingPlans();
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') loadLandingPlans();
+  });
 
   function escapeHtml(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));

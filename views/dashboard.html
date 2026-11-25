@@ -950,7 +950,9 @@
           });
         });
       } catch (e) {
-        if (e.status === 401) { NovaAPI.setToken(null); location.replace('/login'); }
+        if (e.status === 401) { NovaAPI.setToken(null); location.replace('/login'); return; }
+        const container = document.getElementById('planCards');
+        if (container) container.innerHTML = `<div class="text-dim center" style="padding:24px;">Unable to load investment plans. Please refresh the page.</div>`;
       }
     };
 
